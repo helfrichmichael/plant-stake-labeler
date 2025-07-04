@@ -1,43 +1,39 @@
-<mat-grid-list cols="2" rowHeight="2:1">
-  <mat-grid-tile>
-    <div>
-        <form [formGroup]="plantLabelForm" (ngSubmit)="printLabel()">
-            <h3>Set plant tag info</h3>
-            <mat-form-field>
-                <mat-label>Select a plant from the list</mat-label>
-                <input type="text"
-                       placeholder="Pick one"
-                       aria-label="Number"
-                       matInput
-                       [matAutocomplete]="auto"
-                       [formControl]="autocompleteFormControl">
-                <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)">
-                    @for (option of filteredOptions | async; track option) {
-                        <mat-option [value]="option.plantName">{{option.plantName}}</mat-option>
-                    }
-                </mat-autocomplete>
-            </mat-form-field>
-            <h4>OR</h4>
-            <mat-form-field>
-                <mat-label>Plant Name</mat-label>
-                <input matInput formControlName="plantName">
-            </mat-form-field>
-            <mat-form-field>
-                <mat-label>URL for QR Code</mat-label>
-                <input matInput formControlName="url">
-            </mat-form-field>
-            <mat-form-field>
-                <mat-label>Number of Copies</mat-label>
-                <input matInput formControlName="copies" type="number">
-            </mat-form-field>
-            <button matButton="filled" type="submit" [disabled]="!plantLabelForm.valid">Print</button>
-        </form>
-    </div>
-  </mat-grid-tile>
-  <mat-grid-tile>
-    <div>
-        <h3>Preview of plant tag</h3>
-        <img [src]="previewImage" class="preview-image">
-    </div>
-  </mat-grid-tile>
-</mat-grid-list>
+<mat-card appearance="outlined">
+  <mat-card-header>
+    <mat-card-title>Set plant tag info</mat-card-title>
+    <mat-card-subtitle>A preview of the tag is shown below in the image. As you adjust the form, the preview will update.</mat-card-subtitle>
+  </mat-card-header>
+  <img mat-card-image [src]="previewImage">
+  <mat-card-content>
+    <form [formGroup]="plantLabelForm" (ngSubmit)="printLabel()" class="form-container">
+        <mat-form-field>
+            <mat-label>Select a plant from the list</mat-label>
+            <input type="text"
+                   placeholder="Pick one"
+                   aria-label="Number"
+                   matInput
+                   [matAutocomplete]="auto"
+                   [formControl]="autocompleteFormControl">
+            <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)">
+                @for (option of filteredOptions | async; track option) {
+                    <mat-option [value]="option.plantName">{{option.plantName}}</mat-option>
+                }
+            </mat-autocomplete>
+        </mat-form-field>
+        <h4>OR</h4>
+        <mat-form-field>
+            <mat-label>Plant Name</mat-label>
+            <input matInput formControlName="plantName">
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>URL for QR Code</mat-label>
+            <input matInput formControlName="url">
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Number of Copies</mat-label>
+            <input matInput formControlName="copies" type="number">
+        </mat-form-field>
+        <button mat-raised-button type="submit" [disabled]="!plantLabelForm.valid">Print</button>
+    </form>
+  </mat-card-content>
+</mat-card>
