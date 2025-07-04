@@ -1,0 +1,11 @@
+<h2 mat-dialog-title>Are you sure you want to print the following?</h2>
+<mat-dialog-content>
+    <img [src]="previewImage" alt="Preview of the plant label" style="max-width: 100%;">
+    <p><strong>Plant Name:</strong> {{ plantName }}</p>
+    <p><strong>URL:</strong> {{ url }}</p>
+    <p><strong>Number of Copies:</strong> {{ copies }}</p>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="print()">Print</button>
+  <button mat-button mat-dialog-close>Cancel</button>
+</mat-dialog-actions>

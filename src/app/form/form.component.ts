@@ -1,16 +1,17 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit, inject, Inject } from '@angular/core';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatButtonModule } from '@angular/material/button';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { API_URL, DESIGN_NAME, PRINTER_ID, PLANT_LIST,PlantList } from '../app.config';
+import { API_URL, DESIGN_NAME, PRINTER_ID, PLANT_LIST, PlantList } from '../app.config';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { Observable, startWith, map } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
+import { MatDialog, MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 
 @Component({
   selector: 'app-form',
@@ -28,6 +29,7 @@ export class FormComponent implements OnInit {
   });
   autocompleteFormControl = new FormControl();
   filteredOptions?: Observable<PlantList[]>
+  readonly dialog = inject(MatDialog);
 
   ngOnInit() {
     this.filteredOptions = this.autocompleteFormControl.valueChanges.pipe(
@@ -71,5 +73,48 @@ export class FormComponent implements OnInit {
         'url': matchedOption.url,
       });
     }
+  }
+
+  openDialog(): void {
+    const dialogRef = this.dialog.open(ConfirmationDialog, {
+      width: '250px',
+      data: {
+        previewImage: this.previewImage,
+        copies: this.plantLabelForm.get('copies')?.value,
+        plantName: this.plantLabelForm.get('plantName')?.value,
+        url: this.plantLabelForm.get('url')?.value
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result === 'print') {
+        this.printLabel();
+      }
+    });
+  }
+}
+
+@Component({
+  standalone: true,
+  selector: 'confirmation-dialog',
+  templateUrl: 'confirmation-dialog.html',
+  imports: [MatButtonModule, MatDialogModule],
+})
+export class ConfirmationDialog {
+  copies?: number;
+  previewImage?: string;
+  plantName?: string;
+  url?: string;
+  readonly dialogRef = inject(MatDialogRef<ConfirmationDialog>);
+
+  constructor(@Inject(MAT_DIALOG_DATA) public data: { previewImage: string, copies: number, plantName: string, url: string }) {
+    this.copies = data.copies;
+    this.previewImage = data.previewImage;
+    this.plantName = data.plantName;
+    this.url = data.url;
+  }
+
+  print() {
+    this.dialogRef.close('print');
   }
 }

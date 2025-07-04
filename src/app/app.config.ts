@@ -58,7 +58,7 @@ export const PLANT_LIST: PlantList[] = [
     url: 'https://mikescarnivores.com'
   },
   {
-    plantName: `Nepenthes Sanguinea'`,
+    plantName: `Nepenthes Sanguinea`,
     url: 'https://mikescarnivores.com'
   },
   {
