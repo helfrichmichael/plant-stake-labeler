@@ -13,7 +13,7 @@
             </mat-form-field>
             <mat-form-field>
                 <mat-label>Number of Copies</mat-label>
-                <input matInput formControlName="copies">
+                <input matInput formControlName="copies" type="number">
             </mat-form-field>
             <button matButton="filled" type="submit" [disabled]="!plantLabelForm.valid">Print</button>
         </form>

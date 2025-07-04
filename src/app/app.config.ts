@@ -1,11 +1,8 @@
 import { ApplicationConfig } from '@angular/core';
-import { provideRouter } from '@angular/router';
-
-import { routes } from './app.routes';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 
-export const appConfig: ApplicationConfig = {
-  providers: [provideRouter(routes), provideAnimationsAsync()]
+export const APP_CONFIG: ApplicationConfig = {
+  providers: [provideAnimationsAsync()]
 };
 
 export const HOST_IP = '10.0.0.20';

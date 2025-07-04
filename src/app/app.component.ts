@@ -6,10 +6,9 @@ import { FormComponent } from './form/form.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, HeaderComponent, FormComponent],
+  imports: [HeaderComponent, FormComponent],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss'
 })
 export class AppComponent {
-  title = 'label-live-app';
 }
