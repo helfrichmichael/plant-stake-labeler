@@ -2,20 +2,20 @@
   <mat-grid-tile>
     <div>
         <form [formGroup]="plantLabelForm" (ngSubmit)="printLabel()">
-        <h3>Set plant tag info</h3>
-        <mat-form-field>
-            <mat-label>Plant Name</mat-label>
-            <input matInput formControlName="plantName">
-        </mat-form-field>
-        <mat-form-field>
-            <mat-label>URL for QR Code</mat-label>
-            <input matInput formControlName="url">
-        </mat-form-field>
-        <mat-form-field>
-            <mat-label>Number of Copies</mat-label>
-            <input matInput formControlName="copies">
-        </mat-form-field>
-        <button matButton="filled" type="submit" [disabled]="!plantLabelForm.valid">Print</button>
+            <h3>Set plant tag info</h3>
+            <mat-form-field>
+                <mat-label>Plant Name</mat-label>
+                <input matInput formControlName="plantName">
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label>URL for QR Code</mat-label>
+                <input matInput formControlName="url">
+            </mat-form-field>
+            <mat-form-field>
+                <mat-label>Number of Copies</mat-label>
+                <input matInput formControlName="copies">
+            </mat-form-field>
+            <button matButton="filled" type="submit" [disabled]="!plantLabelForm.valid">Print</button>
         </form>
     </div>
   </mat-grid-tile>

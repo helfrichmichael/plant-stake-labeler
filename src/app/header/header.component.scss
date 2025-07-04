@@ -1,6 +1,9 @@
+@import '../../styles.scss';
+
 .header-container {
     align-items: center;
-    border-radius: 30px;
+     border-bottom-left-radius: 30px;
+     border-bottom-right-radius: 30px;
     display: flex;
     justify-content: center;
     margin: auto;
