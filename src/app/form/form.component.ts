@@ -5,7 +5,7 @@ import { FormGroup, FormControl, ReactiveFormsModule, Validators } from '@angula
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { API_URL, DESIGN_NAME, PRINTER_ID, PLANT_LIST } from '../app.config';
+import { API_URL, DESIGN_NAME, PRINTER_ID, PLANT_LIST,PlantList } from '../app.config';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { Observable, startWith, map } from 'rxjs';
@@ -26,18 +26,19 @@ export class FormComponent implements OnInit {
     url: new FormControl('https://mikescarnivores.com', [Validators.required]),
   });
   autocompleteFormControl = new FormControl();
-  filteredOptions?: Observable<{ plantName: string, url: string }[]>
+  filteredOptions?: Observable<PlantList[]>
 
   ngOnInit() {
     this.filteredOptions = this.autocompleteFormControl.valueChanges.pipe(
       startWith(''),
-      map(value => this._filter(value || '')),
+      map(value => this.filterValues(value || '')),
     );
   }
 
-  private _filter(value: string): { plantName: string, url: string }[] {
+  private filterValues(value: string): PlantList[] {
     const filterValue = value.toLowerCase();
-    return this.plantList.filter(option => option.plantName.toLowerCase().includes(filterValue));
+    const filtered = this.plantList.filter(option => option.plantName.toLowerCase().includes(filterValue));
+    return filtered.sort((a, b) => a.plantName.localeCompare(b.plantName));
   }
 
   get previewImage() {
