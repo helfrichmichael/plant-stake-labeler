@@ -1,26 +1,44 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { MatGridListModule } from '@angular/material/grid-list';
 import { MatButtonModule } from '@angular/material/button';
 import { FormGroup, FormControl, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { API_URL, DESIGN_NAME, PRINTER_ID } from '../app.config';
+import { API_URL, DESIGN_NAME, PRINTER_ID, PLANT_LIST } from '../app.config';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
+import { Observable, startWith, map } from 'rxjs';
+import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-form',
   standalone: true,
-  imports: [MatGridListModule, ReactiveFormsModule, MatSelectModule, MatInputModule, MatFormFieldModule, HttpClientModule, MatButtonModule,],
+  imports: [CommonModule, MatGridListModule, ReactiveFormsModule, MatSelectModule, MatInputModule, MatFormFieldModule, HttpClientModule, MatButtonModule, MatAutocompleteModule],
   templateUrl: './form.component.html',
   styleUrl: './form.component.scss'
 })
-export class FormComponent {
+export class FormComponent implements OnInit {
+  plantList = PLANT_LIST;
   plantLabelForm = new FormGroup({
     copies: new FormControl(1, [Validators.required, Validators.pattern('^[0-9]*$')]),
     plantName: new FormControl(`Monstera Deliciosa 'Thai Constellation'`, [Validators.required]),
     url: new FormControl('https://mikescarnivores.com', [Validators.required]),
   });
+  autocompleteFormControl = new FormControl();
+  filteredOptions?: Observable<{ plantName: string, url: string }[]>
+
+  ngOnInit() {
+    this.filteredOptions = this.autocompleteFormControl.valueChanges.pipe(
+      startWith(''),
+      map(value => this._filter(value || '')),
+    );
+  }
+
+  private _filter(value: string): { plantName: string, url: string }[] {
+    const filterValue = value.toLowerCase();
+    return this.plantList.filter(option => option.plantName.toLowerCase().includes(filterValue));
+  }
 
   get previewImage() {
     const plantName = `${this.plantLabelForm.get('plantName')?.value}`;
@@ -38,5 +56,18 @@ export class FormComponent {
       console.info('Response from Label.live local API: ', result);
 
     })
+  }
+
+  onOptionSelected(event: MatAutocompleteSelectedEvent) {
+    const selectedOptionValue = event.option.value;
+
+    const matchedOption = this.plantList.find(option => option.plantName === selectedOptionValue);
+
+    if (matchedOption) {
+      this.plantLabelForm.patchValue({
+        'plantName': matchedOption.plantName,
+        'url': matchedOption.url,
+      });
+    }
   }
 }

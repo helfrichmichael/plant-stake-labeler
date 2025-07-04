@@ -14,3 +14,15 @@ export const API_URL = `http://${HOST_IP}:${HOST_PORT}/api/v1/`;
 export const DESIGN_NAME = 'MC_Label';
 
 export const PRINTER_ID = 'TSC-USB-T4524231356';
+
+export const PLANT_LIST: { plantName: string, url: string }[] = [
+  {
+    plantName: `Nepenthes mirabilis var. Globosa x Ampullaria 'Black Miracle'`, 
+    url: 'https://mikescarnivores.com'
+  },
+  {
+    plantName: `Nepenthes 'Briggsiana' (Lowii x Ventricosa Red)`, 
+    url: 'https://mikescarnivores.com'
+  },
+
+];
