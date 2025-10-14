@@ -14,6 +14,8 @@ export const HOST_IP = '10.0.0.20';
 
 export const HOST_PORT = 11180;
 
+export const REMOTE_API_URL = 'http://labellive.mikescarnivores.com/api/v1/'
+
 export const API_URL = `http://${HOST_IP}:${HOST_PORT}/api/v1/`;
 
 export const DESIGN_NAME = 'MC_Label';
@@ -79,6 +81,18 @@ export const PLANT_LIST: PlantList[] = [
   },
   {
     plantName: `Dionaea Muscipula 'King Henry'`,
+    url: 'https://mikescarnivores.com'
+  },
+  {
+    plantName: `Dionaea Muscipula 'Chinese Dumpling'`,
+    url: 'https://mikescarnivores.com'
+  },
+  {
+    plantName: `Dionaea Muscipula 'B-52'`,
+    url: 'https://mikescarnivores.com'
+  },
+  {
+    plantName: `Dionaea Muscipula 'Big Mouth'`,
     url: 'https://mikescarnivores.com'
   },
   {

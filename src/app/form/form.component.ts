@@ -5,7 +5,7 @@ import { FormGroup, FormControl, ReactiveFormsModule, Validators } from '@angula
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { API_URL, DESIGN_NAME, PRINTER_ID, PLANT_LIST, PlantList } from '../app.config';
+import { API_URL, REMOTE_API_URL, DESIGN_NAME, PRINTER_ID, PLANT_LIST, PlantList } from '../app.config';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { Observable, startWith, map } from 'rxjs';
@@ -30,12 +30,18 @@ export class FormComponent implements OnInit {
   autocompleteFormControl = new FormControl();
   filteredOptions?: Observable<PlantList[]>
   readonly dialog = inject(MatDialog);
+  apiUrlToUse = API_URL;
 
   ngOnInit() {
     this.filteredOptions = this.autocompleteFormControl.valueChanges.pipe(
       startWith(''),
       map(value => this.filterValues(value || '')),
     );
+    // If the requested address is in the format of a domain name (not an IP), change the
+    // API URL to the REMOTE_API_URL specified in the config file.
+    if (window.location.hostname.match(/[a-z]/i)) {
+      this.apiUrlToUse = REMOTE_API_URL;
+    }
   }
 
   private filterValues(value: string): PlantList[] {
@@ -47,7 +53,7 @@ export class FormComponent implements OnInit {
   get previewImage() {
     const plantName = `${this.plantLabelForm.get('plantName')?.value}`;
     const url = this.plantLabelForm.get('url')?.value
-    return API_URL + `print?design=MC_Label&variables=%7B%22PLANT_NAME%22%3A%22%3Cb%3E${plantName}%3C%2Fb%3E%22%2C%22URL%22%3A%22${url}%22%7D`
+    return this.apiUrlToUse + `print?design=MC_Label&variables=%7B%22PLANT_NAME%22%3A%22%3Cb%3E${plantName}%3C%2Fb%3E%22%2C%22URL%22%3A%22${url}%22%7D`
   }
 
   constructor(private readonly http: HttpClient) { }
@@ -56,7 +62,7 @@ export class FormComponent implements OnInit {
     const copies = this.plantLabelForm.get('copies')?.value;
     const plantName = `<b>${this.plantLabelForm.get('plantName')?.value}</b>`;
     const url = this.plantLabelForm.get('url')?.value
-    this.http.post(`http://10.0.0.20:11180/api/v1/print?design=${DESIGN_NAME}&variables={"PLANT_NAME":"${plantName}","URL":"${url}"}&printer=${PRINTER_ID}&window=show&copies=${copies}`, {}).subscribe(result => {
+    this.http.post(`apiUrlToUse/api/v1/print?design=${DESIGN_NAME}&variables={"PLANT_NAME":"${plantName}","URL":"${url}"}&printer=${PRINTER_ID}&window=show&copies=${copies}`, {}).subscribe(result => {
       console.info('Response from Label.live local API: ', result);
 
     })
