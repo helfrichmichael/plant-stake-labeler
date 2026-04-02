@@ -4,7 +4,7 @@
     <mat-card-subtitle>A preview of the tag is shown below in the image. As you adjust the form, the preview will update.</mat-card-subtitle>
   </mat-card-header>
   <img mat-card-image [src]="previewImage">
-  <mat-card-content>
+  <mat-card-content *ngIf="plantList">
     <form [formGroup]="plantLabelForm" (ngSubmit)="openDialog()" class="form-container">
         <mat-form-field>
             <mat-label>Select a plant from the list</mat-label>
@@ -16,7 +16,7 @@
                    [formControl]="autocompleteFormControl">
             <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)">
                 @for (option of filteredOptions | async; track option) {
-                    <mat-option [value]="option.plantName">{{option.plantName}}</mat-option>
+                    <mat-option [value]="option.name">{{option.name}}</mat-option>
                 }
             </mat-autocomplete>
         </mat-form-field>
@@ -35,5 +35,8 @@
         </mat-form-field>
         <button mat-raised-button type="submit" [disabled]="!plantLabelForm.valid">Print</button>
     </form>
+  </mat-card-content>
+  <mat-card-content *ngIf="!plantList">
+    <p>Loading plant list from Google Sheets...</p>
   </mat-card-content>
 </mat-card>
