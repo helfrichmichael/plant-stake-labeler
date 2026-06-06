@@ -33,6 +33,10 @@ export class FormComponent implements OnInit {
   readonly googleSheets = inject(GoogleSheetsService)
   apiUrlToUse = API_URL;
 
+  get hostname() {
+    return window.location.hostname;
+  }
+
   ngOnInit() {
     this.filteredOptions = this.autocompleteFormControl.valueChanges.pipe(
       startWith(''),
@@ -40,7 +44,7 @@ export class FormComponent implements OnInit {
     );
     // If the requested address is in the format of a domain name (not an IP), change the
     // API URL to the REMOTE_API_URL specified in the config file.
-    if (window.location.hostname.match(/[a-z]/i)) {
+    if (this.hostname.match(/[a-z]/i)) {
       this.apiUrlToUse = REMOTE_API_URL;
     }
     this.googleSheets.getValues().subscribe(plants => this.plantList = plants.sort((a, b) => a.name.localeCompare(b.name)));
