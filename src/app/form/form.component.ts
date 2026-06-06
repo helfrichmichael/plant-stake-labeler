@@ -6,7 +6,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { API_URL, REMOTE_API_URL, DESIGN_NAME, PRINTER_ID } from '../app.config';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { HttpClient } from '@angular/common/http';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { Observable, startWith, map } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -15,11 +15,10 @@ import { MatDialog, MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angu
 import { GoogleSheetsService, PlantEntry} from '../google-sheets.service';
 
 @Component({
-  selector: 'app-form',
-  standalone: true,
-  imports: [CommonModule, MatGridListModule, ReactiveFormsModule, MatSelectModule, MatInputModule, MatFormFieldModule, HttpClientModule, MatButtonModule, MatAutocompleteModule, MatCardModule],
-  templateUrl: './form.component.html',
-  styleUrl: './form.component.scss'
+    selector: 'app-form',
+    imports: [CommonModule, MatGridListModule, ReactiveFormsModule, MatSelectModule, MatInputModule, MatFormFieldModule, MatButtonModule, MatAutocompleteModule, MatCardModule],
+    templateUrl: './form.component.html',
+    styleUrl: './form.component.scss'
 })
 export class FormComponent implements OnInit {
   plantList?: PlantEntry[];
@@ -107,10 +106,9 @@ export class FormComponent implements OnInit {
 }
 
 @Component({
-  standalone: true,
-  selector: 'confirmation-dialog',
-  templateUrl: 'confirmation-dialog.html',
-  imports: [MatButtonModule, MatDialogModule],
+    selector: 'confirmation-dialog',
+    templateUrl: 'confirmation-dialog.html',
+    imports: [MatButtonModule, MatDialogModule]
 })
 export class ConfirmationDialog {
   copies?: number;

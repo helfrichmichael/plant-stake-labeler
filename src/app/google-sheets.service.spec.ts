@@ -1,13 +1,20 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
 
-import { GooglesheetsService } from './google-sheets.service';
+import { GoogleSheetsService } from './google-sheets.service';
 
-describe('GooglesheetsService', () => {
-  let service: GooglesheetsService;
+describe('GoogleSheetsService', () => {
+  let service: GoogleSheetsService;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
-    service = TestBed.inject(GooglesheetsService);
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting()
+      ]
+    });
+    service = TestBed.inject(GoogleSheetsService);
   });
 
   it('should be created', () => {
