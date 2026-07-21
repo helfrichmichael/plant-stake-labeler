@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGradHorizontal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#1e293b" />
+    </linearGradient>
+    <linearGradient id="leafGradHorizontal" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#10b981" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="200" rx="16" fill="url(#bgGradHorizontal)" />
+  
+  <!-- Logo Icon -->
+  <g transform="translate(45, 10)">
+    <!-- White Plant Stake -->
+    <path d="M 80 50 A 25 25 0 0 1 130 50 L 130 140 C 130 145 125 152 120 157 L 105 175 L 90 157 C 85 152 80 145 80 140 Z" fill="#ffffff" />
+    <!-- Hole -->
+    <circle cx="105" cy="50" r="6" fill="#0f172a" />
+    <!-- Barcode -->
+    <g fill="#0f172a" opacity="0.85">
+      <rect x="90" y="70" width="3" height="30" />
+      <rect x="96" y="70" width="5" height="30" />
+      <rect x="104" y="70" width="1" height="30" />
+      <rect x="107" y="70" width="4" height="30" />
+      <rect x="114" y="70" width="3" height="30" />
+      <rect x="119" y="70" width="5" height="30" />
+    </g>
+    <!-- Sprout leaf -->
+    <path d="M 90 130 C 55 120 35 95 35 60 C 55 52 80 68 90 95 C 95 110 92 122 90 130 Z" fill="url(#leafGradHorizontal)" />
+    <!-- Leaf vein -->
+    <path d="M 90 130 C 72 105 53 80 35 60" fill="none" stroke="#a7f3d0" stroke-width="2" stroke-linecap="round" opacity="0.7" />
+  </g>
+  
+  <!-- Project Title Typography -->
+  <text x="240" y="105" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="44" font-weight="800" fill="#ffffff" letter-spacing="-0.5">Plant Stake Labeler</text>
+  <!-- Subtitle Typography -->
+  <text x="240" y="138" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif" font-size="16" font-weight="500" fill="#94a3b8" letter-spacing="0.5">On-demand remote web labeling for gardeners</text>
+</svg>

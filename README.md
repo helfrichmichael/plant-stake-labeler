@@ -1,47 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 200" width="100%" height="100%" id="rawSvgB">
-  <defs>
-    <linearGradient id="bgGradHorizontal" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0f172a"></stop>
-      <stop offset="100%" stop-color="#1e293b"></stop>
-    </linearGradient>
-    <linearGradient id="leafGradHorizontal" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#10b981"></stop>
-      <stop offset="100%" stop-color="#059669"></stop>
-    </linearGradient>
-  </defs>
-  
-  <!-- Background rectangle -->
-  <rect width="800" height="200" rx="16" fill="url(#bgGradHorizontal)"></rect>
-  
-  <g transform="translate(45, 10)">
-    <!-- White Plant Stake -->
-    <path d="M 80 50 A 25 25 0 0 1 130 50 L 130 140 C 130 145 125 152 120 157 L 105 175 L 90 157 C 85 152 80 145 80 140 Z" fill="#ffffff"></path>
-    
-    <!-- Hole -->
-    <circle cx="105" cy="50" r="6" fill="#0f172a"></circle>
-    
-    <!-- Barcode -->
-    <g fill="#0f172a" opacity="0.85">
-      <rect x="90" y="70" width="3" height="30"></rect>
-      <rect x="96" y="70" width="5" height="30"></rect>
-      <rect x="104" y="70" width="1" height="30"></rect>
-      <rect x="107" y="70" width="4" height="30"></rect>
-      <rect x="114" y="70" width="3" height="30"></rect>
-      <rect x="119" y="70" width="5" height="30"></rect>
-    </g>
-    
-    <!-- Leaf sprout -->
-    <path d="M 90 130 C 55 120 35 95 35 60 C 55 52 80 68 90 95 C 95 110 92 122 90 130 Z" fill="url(#leafGradHorizontal)"></path>
-    
-    <!-- Leaf vein -->
-    <path d="M 90 130 C 72 105 53 80 35 60" fill="none" stroke="#a7f3d0" stroke-width="2" stroke-linecap="round" opacity="0.7"></path>
-  </g>
-  
-  <text x="240" y="105" font-family="'Outfit', 'Inter', -apple-system, sans-serif" font-size="44" font-weight="800" fill="#ffffff" letter-spacing="-0.5">Plant Stake Labeler</text>
-  <text x="240" y="138" font-family="'Inter', -apple-system, sans-serif" font-size="16" font-weight="500" fill="#94a3b8" letter-spacing="0.5">On-demand remote web labeling for gardeners</text>
-</svg>
 
-# Plant Stake Labeler
+![Plant Stake Labeler](./logo_banner.svg)
 
 An on-demand, remote web interface designed to fetch plant lists from a Google Sheet and print plant stake labels using the [Label LIVE](https://label.live/) application. This setup enables quick and reliable label printing from any web-connected device (such as an iPad or smartphone in the greenhouse) directly to a local label printer.
 
