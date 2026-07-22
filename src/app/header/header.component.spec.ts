@@ -21,16 +21,17 @@ describe('HeaderComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should render the correct title in h1 element', () => {
+  it('should render the correct title in h1 element with sr-only class', () => {
     const headingEl = fixture.debugElement.query(By.css('h1'));
     expect(headingEl).toBeTruthy();
     expect(headingEl.nativeElement.textContent).toContain('Plant Stake Labeler');
+    expect(headingEl.nativeElement.classList.contains('sr-only')).toBeTrue();
   });
 
   it('should render the logo image with correct attributes', () => {
     const imgEl = fixture.debugElement.query(By.css('.header-image'));
     expect(imgEl).toBeTruthy();
-    expect(imgEl.nativeElement.getAttribute('src')).toBe('./assets/logo.png');
-    expect(imgEl.nativeElement.getAttribute('alt')).toBe('Logo for Plant Stake Maker');
+    expect(imgEl.nativeElement.getAttribute('src')).toBe('./assets/logo_banner.svg');
+    expect(imgEl.nativeElement.getAttribute('alt')).toBe('Plant Stake Labeler');
   });
 });
