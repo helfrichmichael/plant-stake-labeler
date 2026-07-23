@@ -18,3 +18,30 @@ app-header, app-form {
 app-header {
   margin-bottom: 24px;
 }
+
+.app-footer {
+  margin-top: auto;
+  padding: 32px 0 8px 0;
+  font-size: 13px;
+  color: #64748b;
+  text-align: center;
+  width: 100%;
+
+  a {
+    color: #10b981;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s ease-in-out;
+
+    &:hover {
+      color: #34d399;
+      text-decoration: underline;
+    }
+  }
+
+  .disclaimer {
+    margin-top: 8px;
+    font-size: 11px;
+    color: #475569;
+  }
+}
