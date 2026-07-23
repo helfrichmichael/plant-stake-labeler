@@ -9,17 +9,46 @@
 @include mat.elevation-classes();
 @include mat.app-background();
 
-// Define the palettes for your theme using the Material Design palettes available in palette.scss
-// (imported above). For each palette, you can optionally specify a default, lighter, and darker
-// hue. Available color palettes: https://material.io/design/color/
-$label-live-app-primary: mat.m2-define-palette(mat.$m2-indigo-palette);
-$label-live-app-accent: mat.m2-define-palette(mat.$m2-pink-palette, A200, A100, A400);
+// Custom Emerald Green palette matching the logo banner
+$custom-emerald: (
+  50: #ecfdf5,
+  100: #d1fae5,
+  200: #a7f3d0,
+  300: #6ee7b7,
+  400: #34d399,
+  500: #10b981,
+  600: #059669,
+  700: #047857,
+  800: #065f46,
+  900: #064e3b,
+  A100: #a7f3d0,
+  A200: #6ee7b7,
+  A400: #34d399,
+  A700: #10b981,
+  contrast: (
+    50: rgba(black, 0.87),
+    100: rgba(black, 0.87),
+    200: rgba(black, 0.87),
+    300: rgba(black, 0.87),
+    400: rgba(black, 0.87),
+    500: white,
+    600: white,
+    700: white,
+    800: white,
+    900: white,
+    A100: rgba(black, 0.87),
+    A200: rgba(black, 0.87),
+    A400: rgba(black, 0.87),
+    A700: white,
+  )
+);
 
-// The warn palette is optional (defaults to red).
+// Define the palettes for your theme
+$label-live-app-primary: mat.m2-define-palette($custom-emerald, 500, 300, 700);
+$label-live-app-accent: mat.m2-define-palette(mat.$m2-teal-palette, A200, A100, A400);
 $label-live-app-warn: mat.m2-define-palette(mat.$m2-red-palette);
 
-// Create the theme object. A theme consists of configurations for individual
-// theming systems such as "color" or "typography".
+// Create the theme object
 $label-live-app-theme: mat.m2-define-dark-theme((
   color: (
     primary: $label-live-app-primary,
@@ -31,12 +60,16 @@ $label-live-app-theme: mat.m2-define-dark-theme((
 ));
 
 // Include theme styles for core and each component used in your app.
-// Alternatively, you can import and @include the theme mixins for each component
-// that you are using.
 @include mat.all-component-themes($label-live-app-theme);
 
 /* You can add global styles to this file, and also import other style files */
-body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+body {
+  margin: 0;
+  font-family: Roboto, "Helvetica Neue", sans-serif;
+  background: linear-gradient(135deg, #090d16 0%, #111827 100%) !important;
+  background-attachment: fixed !important;
+  min-height: 100vh;
+}
 
 html {
   color-scheme: dark;

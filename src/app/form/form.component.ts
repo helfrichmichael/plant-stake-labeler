@@ -14,9 +14,24 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { GoogleSheetsService, PlantEntry} from '../google-sheets.service';
 
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+
 @Component({
     selector: 'app-form',
-    imports: [CommonModule, MatGridListModule, ReactiveFormsModule, MatSelectModule, MatInputModule, MatFormFieldModule, MatButtonModule, MatAutocompleteModule, MatCardModule],
+    imports: [
+        CommonModule,
+        MatGridListModule,
+        ReactiveFormsModule,
+        MatSelectModule,
+        MatInputModule,
+        MatFormFieldModule,
+        MatButtonModule,
+        MatAutocompleteModule,
+        MatCardModule,
+        MatIconModule,
+        MatProgressSpinnerModule
+    ],
     templateUrl: './form.component.html',
     styleUrl: './form.component.scss'
 })
@@ -33,6 +48,9 @@ export class FormComponent implements OnInit {
   readonly googleSheets = inject(GoogleSheetsService)
   apiUrlToUse = API_URL;
 
+  previewImageError = false;
+  previewTimeoutId: any;
+
   get hostname() {
     return window.location.hostname;
   }
@@ -42,12 +60,46 @@ export class FormComponent implements OnInit {
       startWith(''),
       map(value => this.filterValues(value || '')),
     );
-    // If the requested address is in the format of a domain name (not an IP), change the
-    // API URL to the REMOTE_API_URL specified in the config file.
-    if (this.hostname.match(/[a-z]/i)) {
+    // If the requested address is in the format of a domain name (not an IP and not localhost),
+    // change the API URL to the REMOTE_API_URL specified in the config file.
+    if (this.hostname.match(/[a-z]/i) && this.hostname !== 'localhost') {
       this.apiUrlToUse = REMOTE_API_URL;
     }
     this.googleSheets.getValues().subscribe(plants => this.plantList = plants.sort((a, b) => a.name.localeCompare(b.name)));
+    
+    // Reset preview error timeout when user modifies form
+    this.plantLabelForm.valueChanges.subscribe(() => {
+      this.resetPreviewTimeout();
+    });
+    
+    // Start initial timeout
+    this.resetPreviewTimeout();
+  }
+
+  resetPreviewTimeout() {
+    this.previewImageError = false;
+    if (this.previewTimeoutId) {
+      clearTimeout(this.previewTimeoutId);
+    }
+    this.previewTimeoutId = setTimeout(() => {
+      this.previewImageError = true;
+    }, 5000); // 5 seconds timeout
+  }
+
+  onPreviewLoad() {
+    this.previewImageError = false;
+    if (this.previewTimeoutId) {
+      clearTimeout(this.previewTimeoutId);
+      this.previewTimeoutId = null;
+    }
+  }
+
+  onPreviewError() {
+    this.previewImageError = true;
+    if (this.previewTimeoutId) {
+      clearTimeout(this.previewTimeoutId);
+      this.previewTimeoutId = null;
+    }
   }
 
   private filterValues(value: string): PlantEntry[] {
@@ -73,7 +125,7 @@ export class FormComponent implements OnInit {
     const plantName = `<b>${this.plantLabelForm.get('plantName')?.value}</b>`;
     const url = this.plantLabelForm.get('url')?.value;
     this.http.post(`${this.apiUrlToUse}print?design=${DESIGN_NAME}&variables={"PLANT_NAME":"${plantName}","URL":"${url}"}&printer=${PRINTER_ID}&window=show&copies=${copies}`, {}).subscribe(result => {
-      console.info('Response from Label.live local API: ', result);
+      console.info('Response from Label LIVE local API: ', result);
     })
   }
 
@@ -92,7 +144,7 @@ export class FormComponent implements OnInit {
 
   openDialog(): void {
     const dialogRef = this.dialog.open(ConfirmationDialog, {
-      width: '250px',
+      width: '450px',
       data: {
         previewImage: this.previewImage,
         copies: this.plantLabelForm.get('copies')?.value,
@@ -112,13 +164,16 @@ export class FormComponent implements OnInit {
 @Component({
     selector: 'confirmation-dialog',
     templateUrl: 'confirmation-dialog.html',
-    imports: [MatButtonModule, MatDialogModule]
+    styleUrl: './confirmation-dialog.scss',
+    imports: [MatButtonModule, MatDialogModule, MatIconModule]
 })
-export class ConfirmationDialog {
+export class ConfirmationDialog implements OnInit {
   copies?: number;
   previewImage?: string;
   plantName?: string;
   url?: string;
+  imageError = false;
+  dialogTimeoutId: any;
   readonly dialogRef = inject(MatDialogRef<ConfirmationDialog>);
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: { previewImage: string, copies: number, plantName: string, url: string }) {
@@ -126,6 +181,33 @@ export class ConfirmationDialog {
     this.previewImage = data.previewImage;
     this.plantName = data.plantName;
     this.url = data.url;
+  }
+
+  ngOnInit() {
+    this.resetDialogTimeout();
+  }
+
+  resetDialogTimeout() {
+    this.imageError = false;
+    this.dialogTimeoutId = setTimeout(() => {
+      this.imageError = true;
+    }, 5000); // 5 seconds timeout
+  }
+
+  onImageLoad() {
+    this.imageError = false;
+    if (this.dialogTimeoutId) {
+      clearTimeout(this.dialogTimeoutId);
+      this.dialogTimeoutId = null;
+    }
+  }
+
+  onImageError() {
+    this.imageError = true;
+    if (this.dialogTimeoutId) {
+      clearTimeout(this.dialogTimeoutId);
+      this.dialogTimeoutId = null;
+    }
   }
 
   print() {

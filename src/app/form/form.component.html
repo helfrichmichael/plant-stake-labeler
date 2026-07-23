@@ -1,46 +1,85 @@
-<mat-card appearance="outlined">
-  <mat-card-header>
-    <mat-card-title>Set plant tag info</mat-card-title>
-    <mat-card-subtitle>A preview of the tag is shown below in the image. As you adjust the form, the preview will update.</mat-card-subtitle>
-  </mat-card-header>
-  <img mat-card-image [src]="previewImage">
-  @if (plantList) {
-    <mat-card-content>
-      <form [formGroup]="plantLabelForm" (ngSubmit)="openDialog()" class="form-container">
-        <mat-form-field>
-          <mat-label>Select a plant from the list</mat-label>
-          <input type="text"
-            placeholder="Pick one"
-            aria-label="Number"
-            matInput
-            [matAutocomplete]="auto"
-            [formControl]="autocompleteFormControl">
-          <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)">
-            @for (option of filteredOptions | async; track option) {
-              <mat-option [value]="option.name">{{option.name}}</mat-option>
-            }
-          </mat-autocomplete>
-        </mat-form-field>
-        <h4>OR</h4>
-        <mat-form-field>
-          <mat-label>Plant Name</mat-label>
-          <input matInput formControlName="plantName">
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>URL for QR Code</mat-label>
-          <input matInput formControlName="url">
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>Number of Copies</mat-label>
-          <input matInput formControlName="copies" type="number">
-        </mat-form-field>
-        <button mat-raised-button type="submit" [disabled]="!plantLabelForm.valid">Print</button>
-      </form>
-    </mat-card-content>
-  }
-  @if (!plantList) {
-    <mat-card-content>
-      <p>Loading plant list from Google Sheets...</p>
-    </mat-card-content>
-  }
+<mat-card appearance="outlined" class="custom-form-card">
+  <mat-card-content class="card-content-grid">
+    <!-- Preview Section -->
+    <div class="preview-section">
+      <h3 class="section-title">
+        <mat-icon>visibility</mat-icon> Label LIVE Preview
+      </h3>
+      <div class="preview-frame">
+        <div class="preview-error-state" [style.display]="previewImageError ? 'flex' : 'none'">
+          <mat-icon>cloud_off</mat-icon>
+          <p class="error-title">Preview Unavailable</p>
+          <p class="error-msg">Could not load preview. Please verify if the Label LIVE local server is running.</p>
+        </div>
+        <img [src]="previewImage" 
+             [style.display]="previewImageError ? 'none' : 'block'"
+             (error)="onPreviewError()" 
+             (load)="onPreviewLoad()"
+             alt="Live plant label preview" 
+             class="preview-img">
+      </div>
+      <p class="preview-help">The preview updates in real-time as you type or select a plant.</p>
+    </div>
+
+    <!-- Inputs Section -->
+    <div class="inputs-section">
+      <mat-card-header class="custom-card-header">
+        <mat-card-title>Set Plant Tag Info</mat-card-title>
+        <mat-card-subtitle>Search the database or enter details to print custom weather-proof tags.</mat-card-subtitle>
+      </mat-card-header>
+
+      @if (plantList) {
+        <form [formGroup]="plantLabelForm" (ngSubmit)="openDialog()" class="form-container">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Select a plant from the database</mat-label>
+            <input type="text"
+              placeholder="Search by name (e.g. Monstera)..."
+              aria-label="Plant database search autocomplete"
+              matInput
+              [matAutocomplete]="auto"
+              [formControl]="autocompleteFormControl">
+            <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)">
+              @for (option of filteredOptions | async; track option) {
+                <mat-option [value]="option.name">{{option.name}}</mat-option>
+              }
+            </mat-autocomplete>
+            <mat-icon matSuffix color="primary">search</mat-icon>
+          </mat-form-field>
+
+          <div class="divider-or">
+            <span class="divider-line"></span>
+            <span class="divider-text">OR CREATE CUSTOM</span>
+            <span class="divider-line"></span>
+          </div>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Plant Name</mat-label>
+            <input matInput formControlName="plantName" placeholder="e.g. Alocasia Macrorrhiza">
+            <mat-icon matSuffix color="primary">label</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>URL for QR Code</mat-label>
+            <input matInput formControlName="url" placeholder="https://example.com">
+            <mat-icon matSuffix color="primary">link</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Number of Copies</mat-label>
+            <input matInput formControlName="copies" type="number" min="1">
+            <mat-icon matSuffix color="primary">content_copy</mat-icon>
+          </mat-form-field>
+
+          <button mat-flat-button color="primary" type="submit" [disabled]="!plantLabelForm.valid" class="print-button">
+            <mat-icon>print</mat-icon> Print Label
+          </button>
+        </form>
+      } @else {
+        <div class="loading-container">
+          <mat-spinner diameter="40" strokeWidth="4"></mat-spinner>
+          <p class="loading-text">Fetching plant list from Google Sheets...</p>
+        </div>
+      }
+    </div>
+  </mat-card-content>
 </mat-card>

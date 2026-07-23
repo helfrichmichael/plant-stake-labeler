@@ -1,11 +1,36 @@
-<h2 mat-dialog-title>Are you sure you want to print the following?</h2>
-<mat-dialog-content>
-    <img [src]="previewImage" alt="Preview of the plant label" style="max-width: 100%;">
-    <p><strong>Plant Name:</strong> {{ plantName }}</p>
-    <p><strong>URL:</strong> {{ url }}</p>
-    <p><strong>Number of Copies:</strong> {{ copies }}</p>
+<h2 mat-dialog-title class="dialog-title">Confirm Print Job</h2>
+<mat-dialog-content class="dialog-content">
+    <!-- Preview Frame -->
+    <div class="preview-frame">
+        <div class="error-container" [style.display]="imageError ? 'flex' : 'none'">
+            <mat-icon>cloud_off</mat-icon>
+            <span>Preview image is currently unavailable</span>
+        </div>
+        <img [src]="previewImage" 
+             [style.display]="imageError ? 'none' : 'block'"
+             (error)="onImageError()"
+             (load)="onImageLoad()"
+             alt="Preview of the plant label" 
+             class="preview-img">
+    </div>
+    
+    <!-- Info List -->
+    <div class="info-container">
+        <div class="info-row">
+            <span class="row-label">Plant Name</span>
+            <strong class="row-value-strong">{{ plantName }}</strong>
+        </div>
+        <div class="info-row">
+            <span class="row-label">URL Link</span>
+            <span class="row-value-link" [title]="url">{{ url }}</span>
+        </div>
+        <div class="info-row">
+            <span class="row-label">Copies</span>
+            <strong class="row-value-strong">{{ copies }}</strong>
+        </div>
+    </div>
 </mat-dialog-content>
-<mat-dialog-actions>
-  <button mat-button (click)="print()">Print</button>
-  <button mat-button mat-dialog-close>Cancel</button>
+<mat-dialog-actions align="end" class="dialog-actions">
+  <button mat-button mat-dialog-close class="btn-cancel">Cancel</button>
+  <button mat-flat-button color="primary" (click)="print()" class="btn-confirm">Confirm & Print</button>
 </mat-dialog-actions>

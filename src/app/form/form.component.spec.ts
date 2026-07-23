@@ -112,6 +112,14 @@ describe('FormComponent and ConfirmationDialog', () => {
       component.ngOnInit();
       expect(component.apiUrlToUse).toBe(REMOTE_API_URL);
     });
+
+    it('should default apiUrlToUse to API_URL when hostname is "localhost"', () => {
+      spyOnProperty(component, 'hostname', 'get').and.returnValue('localhost');
+      component.apiUrlToUse = API_URL;
+
+      component.ngOnInit();
+      expect(component.apiUrlToUse).toBe(API_URL);
+    });
   });
 
   describe('Autocomplete Filtering', () => {
@@ -223,7 +231,7 @@ describe('FormComponent and ConfirmationDialog', () => {
       component.openDialog();
 
       expect(mockMatDialog.open).toHaveBeenCalledWith(ConfirmationDialog, {
-        width: '250px',
+        width: '450px',
         data: {
           previewImage: component.previewImage,
           copies: component.plantLabelForm.get('copies')?.value,
