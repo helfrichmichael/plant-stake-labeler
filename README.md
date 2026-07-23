@@ -82,6 +82,9 @@ Label LIVE acts as the local print server. The Angular application communicates 
    - Add a Text element for the plant name and set its variable name to exactly **`PLANT_NAME`**.
    - Add a Barcode or QR Code element and set its variable name to exactly **`URL`**.
    - Save the design. Ensure the file name matches `DESIGN_NAME` in `app.config.ts`.
+   
+   > [!NOTE]
+   > A starting template file [MC_Label.lsc](file:///Users/micha/Documents/GitHub/plant-stake-labeler/MC_Label.lsc) is included in the root of this repository. This is a Label LIVE template that we use for Mike's Carnivores, serving as a ready-to-use starting point.
 
 3. **Align Application Settings:**
    - Open [src/app/app.config.ts](file:///home/michael/Documents/GitHub/plant-stake-labeler/src/app/app.config.ts) and verify the following variables:
