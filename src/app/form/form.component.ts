@@ -65,6 +65,10 @@ export class FormComponent implements OnInit {
     if (this.hostname.match(/[a-z]/i) && this.hostname !== 'localhost') {
       this.apiUrlToUse = REMOTE_API_URL;
     }
+    // Ensure the API URL protocol matches the page protocol to avoid mixed content issues
+    if (window.location.protocol === 'https:' && this.apiUrlToUse.startsWith('http:')) {
+      this.apiUrlToUse = this.apiUrlToUse.replace('http:', 'https:');
+    }
     this.googleSheets.getValues().subscribe(plants => this.plantList = plants.sort((a, b) => a.name.localeCompare(b.name)));
 
     // Reset preview error timeout when user modifies form
@@ -132,9 +136,21 @@ export class FormComponent implements OnInit {
       PLANT_NAME: plantName,
       URL: url
     };
-    this.http.post(`${this.apiUrlToUse}print?design=${encodeURIComponent(DESIGN_NAME)}&variables=${encodeURIComponent(JSON.stringify(variables))}&printer=${encodeURIComponent(PRINTER_ID)}&window=show&copies=${copies}`, {}).subscribe(result => {
-      console.info('Response from Label LIVE local API: ', result);
+    const printUrl = `${this.apiUrlToUse}print?design=${encodeURIComponent(DESIGN_NAME)}&variables=${encodeURIComponent(JSON.stringify(variables))}&printer=${encodeURIComponent(PRINTER_ID)}&window=show&copies=${copies}`;
+
+    // Use native fetch with 'no-cors' and 'include' credentials to bypass browser CORS blockages
+    // and pass Cloudflare Zero Trust authentication cookies.
+    fetch(printUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      credentials: 'include'
     })
+    .then(() => {
+      console.info('Print command sent to Label LIVE API');
+    })
+    .catch(error => {
+      console.error('Failed to send print command to Label LIVE API:', error);
+    });
   }
 
   onOptionSelected(event: MatAutocompleteSelectedEvent) {
