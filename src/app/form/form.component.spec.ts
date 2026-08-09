@@ -216,6 +216,8 @@ describe('FormComponent and ConfirmationDialog', () => {
         url: 'https://orchid.org'
       });
 
+      const fetchSpy = spyOn(window, 'fetch').and.returnValue(Promise.resolve(new Response()));
+
       component.printLabel();
 
       const variables = {
@@ -223,10 +225,12 @@ describe('FormComponent and ConfirmationDialog', () => {
         URL: 'https://orchid.org'
       };
       const expectedUrl = `http://test-api/print?design=${encodeURIComponent(DESIGN_NAME)}&variables=${encodeURIComponent(JSON.stringify(variables))}&printer=${encodeURIComponent(PRINTER_ID)}&window=show&copies=3`;
-      const req = httpTestingController.expectOne(expectedUrl);
-      expect(req.request.method).toBe('POST');
-      expect(req.request.body).toEqual({});
-      req.flush({ success: true });
+      
+      expect(fetchSpy).toHaveBeenCalledWith(expectedUrl, {
+        method: 'POST',
+        mode: 'no-cors',
+        credentials: 'include'
+      });
     });
   });
 
