@@ -51,10 +51,6 @@ describe('GoogleSheetsService', () => {
         });
       });
 
-      // Flush config request first
-      const configReq = httpTestingController.expectOne('assets/config.json');
-      configReq.flush({});
-
       const expectedUrl = `https://sheets.googleapis.com/v4/spreadsheets/${environment.spreadsheetId}/values/Sheet1!A:B?key=${environment.apiKey}`;
       const req = httpTestingController.expectOne(expectedUrl);
       expect(req.request.method).toBe('GET');
@@ -84,10 +80,6 @@ describe('GoogleSheetsService', () => {
         });
       });
 
-      // Flush config request first
-      const configReq = httpTestingController.expectOne('assets/config.json');
-      configReq.flush({});
-
       const expectedUrl = `https://sheets.googleapis.com/v4/spreadsheets/${environment.spreadsheetId}/values/Sheet1!A:B?key=${environment.apiKey}`;
       const req = httpTestingController.expectOne(expectedUrl);
       req.flush(mockResponse);
@@ -101,10 +93,6 @@ describe('GoogleSheetsService', () => {
       service.getValues().subscribe(plants => {
         expect(plants).toEqual([]);
       });
-
-      // Flush config request first
-      const configReq = httpTestingController.expectOne('assets/config.json');
-      configReq.flush({});
 
       const expectedUrl = `https://sheets.googleapis.com/v4/spreadsheets/${environment.spreadsheetId}/values/Sheet1!A:B?key=${environment.apiKey}`;
       const req = httpTestingController.expectOne(expectedUrl);
