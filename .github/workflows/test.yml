@@ -24,9 +24,10 @@ jobs:
       run: npm install --no-audit --no-fund
 
     - name: Create mock environment
-      run: |
-        mkdir -p src/app
-        echo "export const environment = { spreadsheetId: 'mock-id', apiKey: 'mock-key' };" > src/app/environment.ts
+      run: node set-env.js
 
     - name: Run unit tests
       run: npm run test -- --watch=false --browsers=ChromeHeadless
+
+    - name: Run build verification
+      run: npm run build
