@@ -12,28 +12,28 @@ import { Observable, startWith, map } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { GoogleSheetsService, PlantEntry} from '../google-sheets.service';
+import { GoogleSheetsService, PlantEntry } from '../google-sheets.service';
 
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 @Component({
-    selector: 'app-form',
-    imports: [
-        CommonModule,
-        MatGridListModule,
-        ReactiveFormsModule,
-        MatSelectModule,
-        MatInputModule,
-        MatFormFieldModule,
-        MatButtonModule,
-        MatAutocompleteModule,
-        MatCardModule,
-        MatIconModule,
-        MatProgressSpinnerModule
-    ],
-    templateUrl: './form.component.html',
-    styleUrl: './form.component.scss'
+  selector: 'app-form',
+  imports: [
+    CommonModule,
+    MatGridListModule,
+    ReactiveFormsModule,
+    MatSelectModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatButtonModule,
+    MatAutocompleteModule,
+    MatCardModule,
+    MatIconModule,
+    MatProgressSpinnerModule
+  ],
+  templateUrl: './form.component.html',
+  styleUrl: './form.component.scss'
 })
 export class FormComponent implements OnInit {
   plantList?: PlantEntry[];
@@ -66,12 +66,12 @@ export class FormComponent implements OnInit {
       this.apiUrlToUse = REMOTE_API_URL;
     }
     this.googleSheets.getValues().subscribe(plants => this.plantList = plants.sort((a, b) => a.name.localeCompare(b.name)));
-    
+
     // Reset preview error timeout when user modifies form
     this.plantLabelForm.valueChanges.subscribe(() => {
       this.resetPreviewTimeout();
     });
-    
+
     // Start initial timeout
     this.resetPreviewTimeout();
   }
@@ -114,17 +114,25 @@ export class FormComponent implements OnInit {
 
   get previewImage() {
     const plantName = `${this.plantLabelForm.get('plantName')?.value}`;
-    const url = this.plantLabelForm.get('url')?.value
-    return this.apiUrlToUse + `print?design=MC_Label&variables=%7B%22PLANT_NAME%22%3A%22%3Cb%3E${plantName}%3C%2Fb%3E%22%2C%22URL%22%3A%22${url}%22%7D`
+    const url = this.plantLabelForm.get('url')?.value || '';
+    const variables = {
+      PLANT_NAME: plantName,
+      URL: url
+    };
+    return this.apiUrlToUse + `print?design=MC_Label&variables=${encodeURIComponent(JSON.stringify(variables))}`;
   }
 
   constructor(private readonly http: HttpClient) { }
 
   printLabel() {
     const copies = this.plantLabelForm.get('copies')?.value;
-    const plantName = `<b>${this.plantLabelForm.get('plantName')?.value}</b>`;
-    const url = this.plantLabelForm.get('url')?.value;
-    this.http.post(`${this.apiUrlToUse}print?design=${DESIGN_NAME}&variables={"PLANT_NAME":"${plantName}","URL":"${url}"}&printer=${PRINTER_ID}&window=show&copies=${copies}`, {}).subscribe(result => {
+    const plantName = `${this.plantLabelForm.get('plantName')?.value}`;
+    const url = this.plantLabelForm.get('url')?.value || '';
+    const variables = {
+      PLANT_NAME: plantName,
+      URL: url
+    };
+    this.http.post(`${this.apiUrlToUse}print?design=${encodeURIComponent(DESIGN_NAME)}&variables=${encodeURIComponent(JSON.stringify(variables))}&printer=${encodeURIComponent(PRINTER_ID)}&window=show&copies=${copies}`, {}).subscribe(result => {
       console.info('Response from Label LIVE local API: ', result);
     })
   }
@@ -162,10 +170,10 @@ export class FormComponent implements OnInit {
 }
 
 @Component({
-    selector: 'confirmation-dialog',
-    templateUrl: 'confirmation-dialog.html',
-    styleUrl: './confirmation-dialog.scss',
-    imports: [MatButtonModule, MatDialogModule, MatIconModule]
+  selector: 'confirmation-dialog',
+  templateUrl: 'confirmation-dialog.html',
+  styleUrl: './confirmation-dialog.scss',
+  imports: [MatButtonModule, MatDialogModule, MatIconModule]
 })
 export class ConfirmationDialog implements OnInit {
   copies?: number;

@@ -197,7 +197,11 @@ describe('FormComponent and ConfirmationDialog', () => {
         url: 'http://test-url'
       });
 
-      const expectedUrl = 'http://test-api/print?design=MC_Label&variables=%7B%22PLANT_NAME%22%3A%22%3Cb%3ETest Plant%3C%2Fb%3E%22%2C%22URL%22%3A%22http://test-url%22%7D';
+      const variables = {
+        PLANT_NAME: 'Test Plant',
+        URL: 'http://test-url'
+      };
+      const expectedUrl = `http://test-api/print?design=MC_Label&variables=${encodeURIComponent(JSON.stringify(variables))}`;
       expect(component.previewImage).toBe(expectedUrl);
     });
   });
@@ -214,7 +218,11 @@ describe('FormComponent and ConfirmationDialog', () => {
 
       component.printLabel();
 
-      const expectedUrl = `http://test-api/print?design=${DESIGN_NAME}&variables={"PLANT_NAME":"<b>Orchid</b>","URL":"https://orchid.org"}&printer=${PRINTER_ID}&window=show&copies=3`;
+      const variables = {
+        PLANT_NAME: 'Orchid',
+        URL: 'https://orchid.org'
+      };
+      const expectedUrl = `http://test-api/print?design=${encodeURIComponent(DESIGN_NAME)}&variables=${encodeURIComponent(JSON.stringify(variables))}&printer=${encodeURIComponent(PRINTER_ID)}&window=show&copies=3`;
       const req = httpTestingController.expectOne(expectedUrl);
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual({});
