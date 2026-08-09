@@ -1,5 +1,6 @@
-
 ![Plant Stake Labeler](./logo_banner.svg)
+
+[![Angular CI](https://github.com/helfrichmichael/plant-stake-labeler/actions/workflows/test.yml/badge.svg)](https://github.com/helfrichmichael/plant-stake-labeler/actions/workflows/test.yml)
 
 An on-demand, remote web interface designed to fetch plant lists from a Google Sheet and print plant stake labels using the [Label LIVE](https://label.live/) application. This setup enables quick and reliable label printing from any web-connected device (such as an iPad or smartphone in the greenhouse) directly to a local label printer.
 
