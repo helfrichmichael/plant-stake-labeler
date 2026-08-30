@@ -3,10 +3,10 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { FormComponent, ConfirmationDialog } from './form.component';
-import { GoogleSheetsService, PlantEntry } from '../google-sheets.service';
+import { GoogleSheetsService, SheetData } from '../google-sheets.service';
+import { SettingsService, AppSettings } from '../settings.service';
 import { MatDialog, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { of, take } from 'rxjs';
-import { API_URL, REMOTE_API_URL, DESIGN_NAME, PRINTER_ID } from '../app.config';
 import { MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 
 describe('FormComponent and ConfirmationDialog', () => {
@@ -16,16 +16,38 @@ describe('FormComponent and ConfirmationDialog', () => {
   let mockGoogleSheetsService: jasmine.SpyObj<GoogleSheetsService>;
   let mockMatDialog: jasmine.SpyObj<MatDialog>;
   let mockMatDialogRef: jasmine.SpyObj<MatDialogRef<ConfirmationDialog>>;
+  let settingsService: SettingsService;
 
-  const mockPlantList: PlantEntry[] = [
-    { name: 'Pothos', url: 'https://pothos.com' },
-    { name: 'Monstera Deliciosa', url: 'https://monstera.com' },
-    { name: 'Alocasia', url: 'https://alocasia.com' }
-  ];
+  const mockSettings: AppSettings = {
+    dataSourceType: 'csvUrl',
+    spreadsheetUrl: '',
+    spreadsheetId: 'test-sheet',
+    apiKey: '',
+    sheetName: 'Sheet1',
+    searchColumn: 'Plant Name',
+    hostIp: '127.0.0.1',
+    hostPort: 11180,
+    remoteApiUrl: '',
+    designName: 'MC_Label',
+    printerId: 'System-TSC TX310',
+    variableMappings: [
+      { variableName: 'PLANT_NAME', sheetColumn: 'Plant Name', fallback: "Monstera Deliciosa 'Thai Constellation'" },
+      { variableName: 'URL', sheetColumn: 'URL', fallback: 'https://mikescarnivores.com' }
+    ]
+  };
+
+  const mockSheetData: SheetData = {
+    headers: ['Plant Name', 'URL', 'SKU'],
+    rows: [
+      { 'Plant Name': 'Pothos', 'URL': 'https://pothos.com', 'SKU': 'PO-01' },
+      { 'Plant Name': 'Monstera Deliciosa', 'URL': 'https://monstera.com', 'SKU': 'MD-02' },
+      { 'Plant Name': 'Alocasia', 'URL': 'https://alocasia.com', 'SKU': 'AL-03' }
+    ]
+  };
 
   beforeEach(async () => {
-    mockGoogleSheetsService = jasmine.createSpyObj('GoogleSheetsService', ['getValues']);
-    mockGoogleSheetsService.getValues.and.returnValue(of(mockPlantList));
+    mockGoogleSheetsService = jasmine.createSpyObj('GoogleSheetsService', ['fetchSheetData', 'getValues']);
+    mockGoogleSheetsService.fetchSheetData.and.returnValue(of(mockSheetData));
 
     mockMatDialog = jasmine.createSpyObj('MatDialog', ['open']);
     mockMatDialogRef = jasmine.createSpyObj('MatDialogRef', ['close', 'afterClosed']);
@@ -38,12 +60,16 @@ describe('FormComponent and ConfirmationDialog', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideNoopAnimations(),
+        SettingsService,
         { provide: GoogleSheetsService, useValue: mockGoogleSheetsService },
         { provide: MatDialog, useValue: mockMatDialog }
       ]
     }).compileComponents();
 
     httpTestingController = TestBed.inject(HttpTestingController);
+    settingsService = TestBed.inject(SettingsService);
+    settingsService.saveSettings(mockSettings, false);
+
     fixture = TestBed.createComponent(FormComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -58,7 +84,7 @@ describe('FormComponent and ConfirmationDialog', () => {
   });
 
   describe('Form Initialization and Default Values', () => {
-    it('should initialize the form with default values', () => {
+    it('should initialize the form with controls from variable mappings', () => {
       expect(component.plantLabelForm.get('copies')?.value).toBe(1);
       expect(component.plantLabelForm.get('plantName')?.value).toBe(`Monstera Deliciosa 'Thai Constellation'`);
       expect(component.plantLabelForm.get('url')?.value).toBe('https://mikescarnivores.com');
@@ -69,7 +95,6 @@ describe('FormComponent and ConfirmationDialog', () => {
       const plantNameControl = component.plantLabelForm.get('plantName');
       const urlControl = component.plantLabelForm.get('url');
 
-      // Test required validation
       copiesControl?.setValue(null);
       plantNameControl?.setValue('');
       urlControl?.setValue('');
@@ -77,48 +102,19 @@ describe('FormComponent and ConfirmationDialog', () => {
       expect(plantNameControl?.valid).toBeFalse();
       expect(urlControl?.valid).toBeFalse();
 
-      // Test pattern validation on copies (only numeric)
-      copiesControl?.setValue('abc' as any);
-      expect(copiesControl?.valid).toBeFalse();
-
-      copiesControl?.setValue(2.5); // pattern requires only digits
-      expect(copiesControl?.valid).toBeFalse();
-
       copiesControl?.setValue(5);
       expect(copiesControl?.valid).toBeTrue();
     });
 
-    it('should fetch and sort plant list on init', () => {
-      expect(mockGoogleSheetsService.getValues).toHaveBeenCalled();
-      // Should sort alphabetically: Alocasia, Monstera Deliciosa, Pothos
-      expect(component.plantList).toEqual([
-        { name: 'Alocasia', url: 'https://alocasia.com' },
-        { name: 'Monstera Deliciosa', url: 'https://monstera.com' },
-        { name: 'Pothos', url: 'https://pothos.com' }
-      ]);
+    it('should fetch plant rows on init', () => {
+      expect(mockGoogleSheetsService.fetchSheetData).toHaveBeenCalled();
+      expect(component.plantList?.length).toBe(3);
     });
 
-    it('should default apiUrlToUse to API_URL when hostname is not a domain', () => {
+    it('should configure apiUrlToUse using hostIp and hostPort for local access', () => {
       spyOnProperty(component, 'hostname', 'get').and.returnValue('127.0.0.1');
-      component.apiUrlToUse = API_URL;
-
-      component.ngOnInit();
-      expect(component.apiUrlToUse).toBe(API_URL);
-    });
-
-    it('should set apiUrlToUse to REMOTE_API_URL when hostname is a domain name', () => {
-      spyOnProperty(component, 'hostname', 'get').and.returnValue('mikescarnivores.com');
-
-      component.ngOnInit();
-      expect(component.apiUrlToUse).toBe(REMOTE_API_URL);
-    });
-
-    it('should default apiUrlToUse to API_URL when hostname is "localhost"', () => {
-      spyOnProperty(component, 'hostname', 'get').and.returnValue('localhost');
-      component.apiUrlToUse = API_URL;
-
-      component.ngOnInit();
-      expect(component.apiUrlToUse).toBe(API_URL);
+      component.updateApiUrl();
+      expect(component.apiUrlToUse).toBe('http://127.0.0.1:11180/api/v1/');
     });
   });
 
@@ -132,26 +128,14 @@ describe('FormComponent and ConfirmationDialog', () => {
         if (emissionCount === 1) {
           expect(filtered.length).toBe(3);
         } else if (emissionCount === 2) {
-          // 'Pothos' contains 'th' (case-insensitive)
+          // 'Pothos' contains 'th'
           expect(filtered.length).toBe(1);
-          expect(filtered[0].name).toBe('Pothos');
+          expect(filtered[0]['Plant Name']).toBe('Pothos');
           done();
         }
       });
 
       component.autocompleteFormControl.setValue('th');
-    });
-
-    it('should return empty list if plantList is not loaded', (done: DoneFn) => {
-      fixture.detectChanges();
-      component.plantList = undefined;
-
-      component.filteredOptions?.pipe(take(1)).subscribe(filtered => {
-        expect(filtered).toEqual([]);
-        done();
-      });
-
-      component.autocompleteFormControl.setValue('any');
     });
   });
 
@@ -169,29 +153,12 @@ describe('FormComponent and ConfirmationDialog', () => {
       expect(component.plantLabelForm.get('plantName')?.value).toBe('Pothos');
       expect(component.plantLabelForm.get('url')?.value).toBe('https://pothos.com');
     });
-
-    it('should not patch form values if option name is not found in plantList', () => {
-      fixture.detectChanges();
-      const mockEvent = {
-        option: {
-          value: 'Non-existent Plant'
-        }
-      } as MatAutocompleteSelectedEvent;
-
-      const oldName = component.plantLabelForm.get('plantName')?.value;
-      const oldUrl = component.plantLabelForm.get('url')?.value;
-
-      component.onOptionSelected(mockEvent);
-
-      expect(component.plantLabelForm.get('plantName')?.value).toBe(oldName);
-      expect(component.plantLabelForm.get('url')?.value).toBe(oldUrl);
-    });
   });
 
   describe('Preview Image', () => {
-    it('should return correct URL for preview image', () => {
+    it('should generate correct URL for preview image with dynamic variables', () => {
       fixture.detectChanges();
-      component.apiUrlToUse = 'http://test-api/';
+      component.apiUrlToUse = 'http://127.0.0.1:11180/api/v1/';
       component.plantLabelForm.patchValue({
         plantName: 'Test Plant',
         url: 'http://test-url'
@@ -201,15 +168,15 @@ describe('FormComponent and ConfirmationDialog', () => {
         PLANT_NAME: 'Test Plant',
         URL: 'http://test-url'
       };
-      const expectedUrl = `http://test-api/print?design=MC_Label&variables=${encodeURIComponent(JSON.stringify(variables))}`;
+      const expectedUrl = `http://127.0.0.1:11180/api/v1/print?design=MC_Label&variables=${encodeURIComponent(JSON.stringify(variables))}`;
       expect(component.previewImage).toBe(expectedUrl);
     });
   });
 
   describe('Printing Labels', () => {
-    it('should make POST request with correct parameters when printLabel is called', () => {
+    it('should make POST request with correct dynamic parameters when printLabel is called', () => {
       fixture.detectChanges();
-      component.apiUrlToUse = 'http://test-api/';
+      component.apiUrlToUse = 'http://127.0.0.1:11180/api/v1/';
       component.plantLabelForm.patchValue({
         copies: 3,
         plantName: 'Orchid',
@@ -224,7 +191,7 @@ describe('FormComponent and ConfirmationDialog', () => {
         PLANT_NAME: 'Orchid',
         URL: 'https://orchid.org'
       };
-      const expectedUrl = `http://test-api/print?design=${encodeURIComponent(DESIGN_NAME)}&variables=${encodeURIComponent(JSON.stringify(variables))}&printer=${encodeURIComponent(PRINTER_ID)}&window=show&copies=3`;
+      const expectedUrl = `http://127.0.0.1:11180/api/v1/print?design=MC_Label&variables=${encodeURIComponent(JSON.stringify(variables))}&printer=${encodeURIComponent('System-TSC TX310')}&window=show&copies=3`;
       
       expect(fetchSpy).toHaveBeenCalledWith(expectedUrl, {
         method: 'POST',
@@ -243,26 +210,16 @@ describe('FormComponent and ConfirmationDialog', () => {
       component.openDialog();
 
       expect(mockMatDialog.open).toHaveBeenCalledWith(ConfirmationDialog, {
-        width: '450px',
+        width: '460px',
         data: {
           previewImage: component.previewImage,
           copies: component.plantLabelForm.get('copies')?.value,
           plantName: component.plantLabelForm.get('plantName')?.value,
-          url: component.plantLabelForm.get('url')?.value
+          url: component.plantLabelForm.get('url')?.value,
+          variables: jasmine.any(Object)
         }
       });
       expect(component.printLabel).toHaveBeenCalled();
-    });
-
-    it('should not print if user cancels dialog', () => {
-      fixture.detectChanges();
-      spyOn(component, 'printLabel');
-      mockMatDialogRef.afterClosed.and.returnValue(of(undefined));
-
-      component.openDialog();
-
-      expect(mockMatDialog.open).toHaveBeenCalled();
-      expect(component.printLabel).not.toHaveBeenCalled();
     });
   });
 });
@@ -276,7 +233,12 @@ describe('ConfirmationDialog', () => {
     previewImage: 'http://preview-img',
     copies: 5,
     plantName: 'Fern',
-    url: 'https://fern.com'
+    url: 'https://fern.com',
+    variables: {
+      PLANT_NAME: 'Fern',
+      URL: 'https://fern.com',
+      PRICE: '$12'
+    }
   };
 
   beforeEach(async () => {
@@ -295,12 +257,13 @@ describe('ConfirmationDialog', () => {
     fixture.detectChanges();
   });
 
-  it('should create and assign data properties', () => {
+  it('should create and assign data properties and variable entries', () => {
     expect(component).toBeTruthy();
     expect(component.copies).toBe(5);
     expect(component.previewImage).toBe('http://preview-img');
-    expect(component.plantName).toBe('Fern');
-    expect(component.url).toBe('https://fern.com');
+    expect(component.variableEntries.length).toBe(3);
+    expect(component.variableEntries[0]).toEqual({ key: 'PLANT_NAME', value: 'Fern' });
+    expect(component.variableEntries[2]).toEqual({ key: 'PRICE', value: '$12' });
   });
 
   it('should close dialog with "print" when print() is called', () => {

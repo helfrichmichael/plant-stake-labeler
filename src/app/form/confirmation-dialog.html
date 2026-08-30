@@ -1,34 +1,36 @@
 <h2 mat-dialog-title class="dialog-title">Confirm Print Job</h2>
 <mat-dialog-content class="dialog-content">
-    <!-- Preview Frame -->
-    <div class="preview-frame">
-        <div class="error-container" [style.display]="imageError ? 'flex' : 'none'">
-            <mat-icon>cloud_off</mat-icon>
-            <span>Preview image is currently unavailable</span>
-        </div>
-        <img [src]="previewImage" 
-             [style.display]="imageError ? 'none' : 'block'"
-             (error)="onImageError()"
-             (load)="onImageLoad()"
-             alt="Preview of the plant label" 
-             class="preview-img">
+  <!-- Preview Frame -->
+  <div class="preview-frame">
+    <div class="error-container" [style.display]="imageError ? 'flex' : 'none'">
+      <mat-icon>cloud_off</mat-icon>
+      <span>Preview image is currently unavailable</span>
     </div>
-    
-    <!-- Info List -->
-    <div class="info-container">
-        <div class="info-row">
-            <span class="row-label">Plant Name</span>
-            <strong class="row-value-strong">{{ plantName }}</strong>
-        </div>
-        <div class="info-row">
-            <span class="row-label">URL Link</span>
-            <span class="row-value-link" [title]="url">{{ url }}</span>
-        </div>
-        <div class="info-row">
-            <span class="row-label">Copies</span>
-            <strong class="row-value-strong">{{ copies }}</strong>
-        </div>
+    <img [src]="previewImage" 
+         [style.display]="imageError ? 'none' : 'block'"
+         (error)="onImageError()"
+         (load)="onImageLoad()"
+         alt="Preview of the plant label" 
+         class="preview-img">
+  </div>
+  
+  <!-- Info List (Dynamic Variables) -->
+  <div class="info-container">
+    @for (entry of variableEntries; track entry.key) {
+      <div class="info-row">
+        <span class="row-label">{{ entry.key }}</span>
+        @if (entry.key.includes('URL') || entry.key.includes('LINK')) {
+          <span class="row-value-link" [title]="entry.value">{{ entry.value }}</span>
+        } @else {
+          <strong class="row-value-strong">{{ entry.value }}</strong>
+        }
+      </div>
+    }
+    <div class="info-row">
+      <span class="row-label">Copies</span>
+      <strong class="row-value-strong">{{ copies }}</strong>
     </div>
+  </div>
 </mat-dialog-content>
 <mat-dialog-actions align="end" class="dialog-actions">
   <button mat-button mat-dialog-close class="btn-cancel">Cancel</button>

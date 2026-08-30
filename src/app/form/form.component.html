@@ -9,7 +9,7 @@
         <div class="preview-error-state" [style.display]="previewImageError ? 'flex' : 'none'">
           <mat-icon>cloud_off</mat-icon>
           <p class="error-title">Preview Unavailable</p>
-          <p class="error-msg">Could not load preview. Please verify if the Label LIVE local server is running.</p>
+          <p class="error-msg">Could not load preview. Please verify if the Label LIVE local server is running on port {{ currentSettings.hostPort }}.</p>
         </div>
         <img [src]="previewImage" 
              [style.display]="previewImageError ? 'none' : 'block'"
@@ -25,45 +25,70 @@
     <div class="inputs-section">
       <mat-card-header class="custom-card-header">
         <mat-card-title>Set Plant Tag Info</mat-card-title>
-        <mat-card-subtitle>Search the database or enter details to print custom weather-proof tags.</mat-card-subtitle>
+        <mat-card-subtitle>Search your inventory or edit mapped fields to print custom tags.</mat-card-subtitle>
       </mat-card-header>
 
-      @if (plantList) {
+      @if (plantList !== undefined) {
         <form [formGroup]="plantLabelForm" (ngSubmit)="openDialog()" class="form-container">
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Select a plant from the database</mat-label>
-            <input type="text"
-              placeholder="Search by name (e.g. Monstera)..."
-              aria-label="Plant database search autocomplete"
-              matInput
-              [matAutocomplete]="auto"
-              [formControl]="autocompleteFormControl">
-            <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)">
-              @for (option of filteredOptions | async; track option) {
-                <mat-option [value]="option.name">{{option.name}}</mat-option>
+          
+          <!-- Autocomplete Search -->
+          @if (plantList.length > 0) {
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Search inventory by {{ searchColumn }}</mat-label>
+              <input type="text"
+                [placeholder]="'Search by ' + searchColumn + '...'"
+                aria-label="Plant database search autocomplete"
+                matInput
+                [matAutocomplete]="auto"
+                [formControl]="autocompleteFormControl">
+              <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onOptionSelected($event)">
+                @for (option of filteredOptions | async; track option) {
+                  <mat-option [value]="getDisplayValue(option)">{{ getDisplayValue(option) }}</mat-option>
+                }
+              </mat-autocomplete>
+              <mat-icon matSuffix color="primary">search</mat-icon>
+            </mat-form-field>
+
+            <div class="divider-or">
+              <span class="divider-line"></span>
+              <span class="divider-text">OR EDIT CUSTOM VALUES</span>
+              <span class="divider-line"></span>
+            </div>
+          } @else {
+            <div class="no-sheet-banner">
+              <mat-icon>info_outline</mat-icon>
+              <span>No Google Sheet records loaded. You can still print custom labels or <a (click)="openSettings()" class="settings-link">configure settings</a>.</span>
+            </div>
+          }
+
+          <!-- Dynamic Form Fields for each mapped variable -->
+          @for (mapping of variableMappings; track mapping.variableName) {
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>{{ mapping.sheetColumn || mapping.variableName }} ({{ mapping.variableName }})</mat-label>
+              
+              @if (mapping.variableName === 'PLANT_NAME' && plantLabelForm.get('plantName')) {
+                <input matInput formControlName="plantName" [placeholder]="mapping.fallback || 'Enter value...'">
+              } @else if (mapping.variableName === 'URL' && plantLabelForm.get('url')) {
+                <input matInput formControlName="url" [placeholder]="mapping.fallback || 'https://...'">
+              } @else {
+                <input matInput [formControlName]="mapping.variableName" [placeholder]="mapping.fallback || 'Enter value...'">
               }
-            </mat-autocomplete>
-            <mat-icon matSuffix color="primary">search</mat-icon>
-          </mat-form-field>
 
-          <div class="divider-or">
-            <span class="divider-line"></span>
-            <span class="divider-text">OR CREATE CUSTOM</span>
-            <span class="divider-line"></span>
-          </div>
+              @if (mapping.variableName.includes('URL') || mapping.variableName.includes('LINK')) {
+                <mat-icon matSuffix color="primary">link</mat-icon>
+              } @else if (mapping.variableName.includes('PRICE') || mapping.variableName.includes('COST')) {
+                <mat-icon matSuffix color="primary">attach_money</mat-icon>
+              } @else if (mapping.variableName.includes('SKU') || mapping.variableName.includes('ID') || mapping.variableName.includes('CODE')) {
+                <mat-icon matSuffix color="primary">qr_code</mat-icon>
+              } @else if (mapping.variableName.includes('NAME') || mapping.variableName.includes('TITLE')) {
+                <mat-icon matSuffix color="primary">label</mat-icon>
+              } @else {
+                <mat-icon matSuffix color="primary">edit_note</mat-icon>
+              }
+            </mat-form-field>
+          }
 
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Plant Name</mat-label>
-            <input matInput formControlName="plantName" placeholder="e.g. Alocasia Macrorrhiza">
-            <mat-icon matSuffix color="primary">label</mat-icon>
-          </mat-form-field>
-
-          <mat-form-field appearance="outline" class="full-width">
-            <mat-label>URL for QR Code</mat-label>
-            <input matInput formControlName="url" placeholder="https://example.com">
-            <mat-icon matSuffix color="primary">link</mat-icon>
-          </mat-form-field>
-
+          <!-- Copies Control -->
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Number of Copies</mat-label>
             <input matInput formControlName="copies" type="number" min="1">

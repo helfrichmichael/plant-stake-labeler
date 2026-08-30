@@ -211,3 +211,35 @@
     max-width: 280px;
   }
 }
+
+.no-sheet-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 8px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: #94a3b8;
+
+  mat-icon {
+    color: #10b981;
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+  }
+
+  .settings-link {
+    color: #34d399;
+    text-decoration: underline;
+    cursor: pointer;
+    font-weight: 500;
+
+    &:hover {
+      color: #6ee7b7;
+    }
+  }
+}
