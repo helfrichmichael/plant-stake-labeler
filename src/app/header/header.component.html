@@ -1,4 +1,9 @@
 <div class="header-container">
-    <h1 class="sr-only">Plant Stake Labeler</h1>
+  <h1 class="sr-only">Plant Stake Labeler</h1>
+  <div class="header-content">
     <img src="./assets/logo_banner.svg" alt="Plant Stake Labeler" class="header-image" />
+    <button mat-icon-button class="settings-btn" (click)="openSettings()" matTooltip="Application Settings & Field Mappings" aria-label="Open settings">
+      <mat-icon>settings</mat-icon>
+    </button>
+  </div>
 </div>

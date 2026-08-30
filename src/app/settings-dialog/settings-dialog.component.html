@@ -1,0 +1,232 @@
+<div class="settings-dialog-container">
+  <div class="dialog-header">
+    <div class="title-with-icon">
+      <mat-icon color="primary">settings</mat-icon>
+      <h2>Application Settings</h2>
+    </div>
+    <button mat-icon-button (click)="onCancel()" aria-label="Close settings">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <mat-dialog-content class="dialog-content">
+    <form [formGroup]="settingsForm">
+      <mat-tab-group animationDuration="200ms" class="custom-tabs">
+        
+        <!-- Tab 1: Google Sheets / Data Source -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon class="tab-icon">table_view</mat-icon> Data Source
+          </ng-template>
+          <div class="tab-body">
+            <p class="tab-intro">
+              Connect your Google Sheet or CSV data source. Public sheets can be read directly without any Google Cloud account or API key.
+            </p>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Google Sheet URL or Spreadsheet ID</mat-label>
+              <input matInput formControlName="spreadsheetUrl" placeholder="https://docs.google.com/spreadsheets/d/1BxiMVs0.../edit">
+              <mat-icon matSuffix color="primary">link</mat-icon>
+              <mat-hint>Paste the full Google Sheet link or just the spreadsheet ID</mat-hint>
+            </mat-form-field>
+
+            <div class="two-col-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Worksheet Name</mat-label>
+                <input matInput formControlName="sheetName" placeholder="Sheet1">
+                <mat-hint>The tab name at the bottom of your sheet</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Search / Title Column</mat-label>
+                @if (detectedHeaders.length > 0) {
+                  <mat-select formControlName="searchColumn">
+                    @for (header of detectedHeaders; track header) {
+                      <mat-option [value]="header">{{ header }}</mat-option>
+                    }
+                  </mat-select>
+                } @else {
+                  <input matInput formControlName="searchColumn" placeholder="Plant Name">
+                }
+                <mat-hint>Column used for searching in the main autocomplete</mat-hint>
+              </mat-form-field>
+            </div>
+
+            <div class="fetch-action-row">
+              <button mat-stroked-button color="primary" type="button" (click)="fetchSheetColumns()" [disabled]="isFetchingHeaders">
+                @if (isFetchingHeaders) {
+                  <mat-spinner diameter="18" class="btn-spinner"></mat-spinner>
+                  <span>Fetching Columns...</span>
+                } @else {
+                  <ng-container>
+                    <mat-icon>refresh</mat-icon>
+                    <span>Test & Fetch Sheet Columns</span>
+                  </ng-container>
+                }
+              </button>
+
+              @if (fetchSuccess) {
+                <span class="status-msg success">
+                  <mat-icon>check_circle</mat-icon> {{ detectedHeaders.length }} columns detected
+                </span>
+              }
+              @if (fetchError) {
+                <span class="status-msg error">
+                  <mat-icon>error_outline</mat-icon> {{ fetchError }}
+                </span>
+              }
+            </div>
+
+            @if (detectedHeaders.length > 0) {
+              <div class="detected-chips">
+                <span class="chip-label">Detected Columns:</span>
+                <mat-chip-set>
+                  @for (header of detectedHeaders; track header) {
+                    <mat-chip>{{ header }}</mat-chip>
+                  }
+                </mat-chip-set>
+              </div>
+            }
+
+            <mat-divider class="section-divider"></mat-divider>
+
+            <details class="advanced-section">
+              <summary><mat-icon class="sm-icon">tune</mat-icon> Advanced Options (API Key)</summary>
+              <div class="advanced-content">
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Google Cloud API Key (Optional)</mat-label>
+                  <input matInput formControlName="apiKey" type="password" placeholder="AIzaSy...">
+                  <mat-hint>Only needed if your Google Sheet is private and restricted to Google Cloud API</mat-hint>
+                </mat-form-field>
+              </div>
+            </details>
+          </div>
+        </mat-tab>
+
+        <!-- Tab 2: Variable Mappings -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon class="tab-icon">hub</mat-icon> Field Mappings
+          </ng-template>
+          <div class="tab-body">
+            <div class="mapping-header-actions">
+              <div>
+                <p class="tab-intro">
+                  Map your <strong>Label LIVE template variables</strong> to the columns in your Google Sheet.
+                </p>
+              </div>
+              <div class="header-btns">
+                <button mat-stroked-button color="accent" type="button" (click)="autoMatchVariables()" [disabled]="detectedHeaders.length === 0">
+                  <mat-icon>auto_fix_high</mat-icon> Auto-Match
+                </button>
+                <button mat-flat-button color="primary" type="button" (click)="addMapping()">
+                  <mat-icon>add</mat-icon> Add Variable
+                </button>
+              </div>
+            </div>
+
+            <div formArrayName="variableMappings" class="mapping-list">
+              @for (mapping of variableMappingsArray.controls; track $index) {
+                <div [formGroupName]="$index" class="mapping-row">
+                  <mat-form-field appearance="outline" class="var-field">
+                    <mat-label>Label LIVE Variable</mat-label>
+                    <input matInput formControlName="variableName" placeholder="e.g. PLANT_NAME">
+                  </mat-form-field>
+
+                  <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+
+                  <mat-form-field appearance="outline" class="sheet-field">
+                    <mat-label>Google Sheet Column</mat-label>
+                    @if (detectedHeaders.length > 0) {
+                      <mat-select formControlName="sheetColumn">
+                        @for (col of detectedHeaders; track col) {
+                          <mat-option [value]="col">{{ col }}</mat-option>
+                        }
+                      </mat-select>
+                    } @else {
+                      <input matInput formControlName="sheetColumn" placeholder="e.g. Plant Name">
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="fallback-field">
+                    <mat-label>Fallback Value (Optional)</mat-label>
+                    <input matInput formControlName="fallback" placeholder="Default if blank">
+                  </mat-form-field>
+
+                  <button mat-icon-button color="warn" type="button" (click)="removeMapping($index)" aria-label="Remove mapping" class="remove-btn">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+              }
+            </div>
+
+            @if (variableMappingsArray.controls.length === 0) {
+              <div class="empty-mappings">
+                <mat-icon>info</mat-icon>
+                <p>No variable mappings configured. Click "Add Variable" or "Auto-Match" to add fields.</p>
+              </div>
+            }
+          </div>
+        </mat-tab>
+
+        <!-- Tab 3: Label LIVE & Printer -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon class="tab-icon">print</mat-icon> Label LIVE & Printer
+          </ng-template>
+          <div class="tab-body">
+            <p class="tab-intro">
+              Configure connection parameters for the Label LIVE local HTTP API server and your physical printer.
+            </p>
+
+            <div class="two-col-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Template Design Name</mat-label>
+                <input matInput formControlName="designName" placeholder="MC_Label">
+                <mat-hint>Design filename in Label LIVE (without .lsc)</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Printer ID / System Name</mat-label>
+                <input matInput formControlName="printerId" placeholder="System-TSC TX310">
+                <mat-hint>Exact name of printer as seen in Label LIVE</mat-hint>
+              </mat-form-field>
+            </div>
+
+            <div class="two-col-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Label LIVE Host IP</mat-label>
+                <input matInput formControlName="hostIp" placeholder="127.0.0.1 or 10.0.0.20">
+                <mat-hint>Use 127.0.0.1 if running on this computer</mat-hint>
+              </mat-form-field>
+
+              <mat-form-field appearance="outline">
+                <mat-label>Label LIVE Port</mat-label>
+                <input matInput formControlName="hostPort" type="number" placeholder="11180">
+                <mat-hint>Default Label LIVE port is 11180</mat-hint>
+              </mat-form-field>
+            </div>
+
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Remote API URL (Optional)</mat-label>
+              <input matInput formControlName="remoteApiUrl" placeholder="http://labellive.yourdomain.com/api/v1/">
+              <mat-hint>Used when accessing the app remotely via a domain name reverse proxy</mat-hint>
+            </mat-form-field>
+          </div>
+        </mat-tab>
+
+      </mat-tab-group>
+    </form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions class="dialog-actions">
+    <button mat-button color="warn" type="button" (click)="onResetDefaults()">
+      <mat-icon>restart_alt</mat-icon> Reset Defaults
+    </button>
+    <div class="spacer"></div>
+    <button mat-button type="button" (click)="onCancel()">Cancel</button>
+    <button mat-flat-button color="primary" type="button" (click)="onSave()" [disabled]="settingsForm.invalid">
+      <mat-icon>check</mat-icon> Save & Apply
+    </button>
+  </mat-dialog-actions>
+</div>
