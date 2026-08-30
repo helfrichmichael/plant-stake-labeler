@@ -1,0 +1,25 @@
+{
+  "dataSourceType": "googleApi",
+  "spreadsheetUrl": "",
+  "spreadsheetId": "",
+  "apiKey": "",
+  "sheetName": "Sheet1",
+  "searchColumn": "Name",
+  "hostIp": "127.0.0.1",
+  "hostPort": 11180,
+  "remoteApiUrl": "",
+  "designName": "MC_Label",
+  "printerId": "System-TSC TX310",
+  "variableMappings": [
+    {
+      "variableName": "PLANT_NAME",
+      "sheetColumn": "Name",
+      "fallback": ""
+    },
+    {
+      "variableName": "URL",
+      "sheetColumn": "URL",
+      "fallback": "https://mikescarnivores.com"
+    }
+  ]
+}

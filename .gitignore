@@ -44,3 +44,4 @@ Thumbs.db
 
 # API Keys and sensitive information.
 /src/app/environment.ts
+/config.json
