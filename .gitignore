@@ -46,3 +46,4 @@ Thumbs.db
 /src/app/environment.ts
 /config.json
 /print_history.json
+/data/

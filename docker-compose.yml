@@ -8,7 +8,8 @@ services:
     restart: unless-stopped
     ports:
       - "4200:4200"
+    environment:
+      - DATA_DIR=/app/data
     volumes:
-      # Mount local configuration and print history for persistence
-      - ./config.json:/app/config.json
-      - ./print_history.json:/app/print_history.json
+      # Mount single data directory (stores config.json, print_history.json, etc.)
+      - ./data:/app/data

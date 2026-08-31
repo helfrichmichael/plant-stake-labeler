@@ -6,6 +6,7 @@ and /api/history endpoints so all greenhouse devices share the same
 configuration and print history log.
 """
 
+import os
 import sys
 import json
 import shutil
@@ -13,16 +14,29 @@ from http.server import SimpleHTTPRequestHandler, HTTPServer
 from pathlib import Path
 
 BASE_DIR = Path(__file__).parent.resolve()
+# Use DATA_DIR environment variable if provided, otherwise default to BASE_DIR / "data" if present, else BASE_DIR
+DATA_DIR = Path(os.environ.get("DATA_DIR", BASE_DIR / "data" if (BASE_DIR / "data").exists() else BASE_DIR))
 DIST_DIR = BASE_DIR / "dist" / "label-live-app" / "browser"
-CONFIG_FILE = BASE_DIR / "config.json"
+CONFIG_FILE = DATA_DIR / "config.json"
 EXAMPLE_CONFIG = BASE_DIR / "config.example.json"
-HISTORY_FILE = BASE_DIR / "print_history.json"
+HISTORY_FILE = DATA_DIR / "print_history.json"
 MAX_HISTORY_ITEMS = 50
 
 def get_or_create_config():
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
     if not CONFIG_FILE.exists():
-        if EXAMPLE_CONFIG.exists():
-            shutil.copyfile(EXAMPLE_CONFIG, CONFIG_FILE)
+        # Check if legacy config exists in BASE_DIR
+        legacy_config = BASE_DIR / "config.json"
+        if legacy_config.exists() and legacy_config != CONFIG_FILE:
+            try:
+                shutil.copyfile(legacy_config, CONFIG_FILE)
+            except Exception as e:
+                print(f"Warning: Could not copy legacy config: {e}", file=sys.stderr)
+        elif EXAMPLE_CONFIG.exists():
+            try:
+                shutil.copyfile(EXAMPLE_CONFIG, CONFIG_FILE)
+            except Exception as e:
+                print(f"Warning: Could not copy example config: {e}", file=sys.stderr)
         else:
             return {}
     try:
@@ -33,6 +47,7 @@ def get_or_create_config():
         return {}
 
 def save_config(config_data):
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
     try:
         with open(CONFIG_FILE, "w", encoding="utf-8") as f:
             json.dump(config_data, f, indent=2)
@@ -42,6 +57,7 @@ def save_config(config_data):
         return False
 
 def get_history():
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
     if not HISTORY_FILE.exists():
         return []
     try:
@@ -52,6 +68,7 @@ def get_history():
         return []
 
 def add_history_entry(entry):
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
     history = get_history()
     # Filter out duplicate ID if exists, prepend new entry
     history = [h for h in history if h.get("id") != entry.get("id")]
@@ -66,6 +83,7 @@ def add_history_entry(entry):
         return False
 
 def clear_history():
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
     try:
         with open(HISTORY_FILE, "w", encoding="utf-8") as f:
             json.dump([], f, indent=2)
@@ -190,7 +208,7 @@ class AppHandler(SimpleHTTPRequestHandler):
 
 def run_server(port=4200):
     httpd = HTTPServer(("", port), AppHandler)
-    print(f"🌿 Server running at http://localhost:{port} (Shared config at /api/config, history at /api/history)")
+    print(f"🌿 Server running at http://localhost:{port} (Data directory: {DATA_DIR})")
     try:
         httpd.serve_forever()
     except KeyboardInterrupt:

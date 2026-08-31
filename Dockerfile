@@ -26,8 +26,11 @@ COPY --from=builder /app/dist/label-live-app/browser ./dist/label-live-app/brows
 # Copy server script and configuration template
 COPY server.py config.example.json ./
 
-# Create data directory volume for persistent config & print history
-VOLUME ["/app"]
+# Define persistent data directory for config.json and print_history.json
+ENV DATA_DIR=/app/data
+RUN mkdir -p /app/data
+
+VOLUME ["/app/data"]
 
 EXPOSE 4200
 
