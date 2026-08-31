@@ -19,6 +19,45 @@
              class="preview-img">
       </div>
       <p class="preview-help">The preview updates in real-time as you type or select a plant.</p>
+
+      <!-- Recently Printed Section -->
+      <div class="recent-prints-card">
+        <div class="recent-header">
+          <div class="recent-title-group">
+            <mat-icon class="recent-icon">history</mat-icon>
+            <span class="recent-heading">Recently Printed</span>
+          </div>
+          @if (recentPrints.length > 0) {
+            <button mat-button color="warn" class="clear-history-btn" (click)="clearHistory()" type="button">
+              Clear
+            </button>
+          }
+        </div>
+
+        @if (recentPrints.length > 0) {
+          <div class="recent-list">
+            @for (item of recentPrints; track item.id) {
+              <div class="recent-item" (click)="applyRecentPrint(item)">
+                <div class="recent-item-info">
+                  <span class="recent-plant-name">{{ item.plantName }}</span>
+                  <div class="recent-meta">
+                    <span class="recent-time">{{ formatTime(item.timestamp) }}</span>
+                    <span class="recent-copies-badge">{{ item.copies }} {{ item.copies === 1 ? 'copy' : 'copies' }}</span>
+                  </div>
+                </div>
+                <button mat-icon-button color="primary" class="reuse-btn" (click)="applyRecentPrint(item); $event.stopPropagation()" matTooltip="Re-fill Form" aria-label="Re-fill Form">
+                  <mat-icon>replay</mat-icon>
+                </button>
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="no-recent-prints">
+            <mat-icon>history_toggle_off</mat-icon>
+            <span>No labels printed yet. Print a label to start your log.</span>
+          </div>
+        }
+      </div>
     </div>
 
     <!-- Inputs Section -->

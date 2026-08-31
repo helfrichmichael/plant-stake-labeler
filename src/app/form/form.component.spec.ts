@@ -76,6 +76,8 @@ describe('FormComponent and ConfirmationDialog', () => {
   });
 
   afterEach(() => {
+    const historyReqs = httpTestingController.match('/api/history');
+    historyReqs.forEach(r => r.flush({ success: true }));
     httpTestingController.verify();
   });
 
@@ -220,6 +222,35 @@ describe('FormComponent and ConfirmationDialog', () => {
         }
       });
       expect(component.printLabel).toHaveBeenCalled();
+    });
+  });
+
+  describe('Recent Prints History', () => {
+    it('should apply a recent print item to the form', () => {
+      fixture.detectChanges();
+      const mockItem = {
+        id: '123',
+        timestamp: new Date().toISOString(),
+        plantName: 'Nepenthes Rajah',
+        url: 'https://carnivores.org',
+        copies: 3,
+        variables: {
+          PLANT_NAME: 'Nepenthes Rajah',
+          URL: 'https://carnivores.org'
+        }
+      };
+
+      component.applyRecentPrint(mockItem);
+
+      expect(component.plantLabelForm.get('plantName')?.value).toBe('Nepenthes Rajah');
+      expect(component.plantLabelForm.get('url')?.value).toBe('https://carnivores.org');
+      expect(component.plantLabelForm.get('copies')?.value).toBe(3);
+    });
+
+    it('should format relative timestamps correctly', () => {
+      expect(component.formatTime(new Date().toISOString())).toBe('Just now');
+      const pastDate = new Date(Date.now() - 10 * 60 * 1000).toISOString();
+      expect(component.formatTime(pastDate)).toBe('10m ago');
     });
   });
 });

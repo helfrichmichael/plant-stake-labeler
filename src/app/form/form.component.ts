@@ -5,7 +5,6 @@ import { FormGroup, FormControl, ReactiveFormsModule, Validators } from '@angula
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { HttpClient } from '@angular/common/http';
 import { MatAutocompleteModule, MatAutocompleteSelectedEvent } from '@angular/material/autocomplete';
 import { Observable, startWith, map, Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
@@ -13,6 +12,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatDialog, MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { GoogleSheetsService } from '../google-sheets.service';
 import { SettingsService, AppSettings, VariableMapping } from '../settings.service';
+import { PrintHistoryService, PrintHistoryItem } from '../print-history.service';
 import { SettingsDialogComponent } from '../settings-dialog/settings-dialog.component';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
@@ -51,14 +51,18 @@ export class FormComponent implements OnInit, OnDestroy {
   readonly dialog = inject(MatDialog);
   readonly googleSheets = inject(GoogleSheetsService);
   readonly settingsService = inject(SettingsService);
+  readonly historyService = inject(PrintHistoryService);
 
   currentSettings: AppSettings = this.settingsService.currentSettings;
   detectedHeaders: string[] = [];
   apiUrlToUse = '';
   previewImageError = false;
   isPreviewLoading = false;
+  recentPrints: PrintHistoryItem[] = [];
+
   private settingsSub?: Subscription;
   private formSub?: Subscription;
+  private historySub?: Subscription;
 
   constructor() {
     this.updateApiUrl();
@@ -89,11 +93,16 @@ export class FormComponent implements OnInit, OnDestroy {
       this.rebuildForm();
       this.loadPlantList();
     });
+
+    this.historySub = this.historyService.history$.subscribe(history => {
+      this.recentPrints = history;
+    });
   }
 
   ngOnDestroy(): void {
     this.settingsSub?.unsubscribe();
     this.formSub?.unsubscribe();
+    this.historySub?.unsubscribe();
   }
 
   updateApiUrl(): void {
@@ -300,6 +309,17 @@ export class FormComponent implements OnInit, OnDestroy {
     const design = this.currentSettings.designName || 'MC_Label';
     const printer = this.currentSettings.printerId || 'System-TSC TX310';
 
+    const primaryTitle = variables['PLANT_NAME'] || Object.values(variables)[0] || 'Plant Label';
+    const primaryUrl = variables['URL'] || '';
+
+    // Record in history
+    this.historyService.addEntry({
+      plantName: primaryTitle,
+      url: primaryUrl,
+      copies,
+      variables
+    });
+
     const printUrl = `${this.apiUrlToUse}print?design=${encodeURIComponent(design)}&variables=${encodeURIComponent(JSON.stringify(variables))}&printer=${encodeURIComponent(printer)}&window=show&copies=${copies}`;
 
     fetch(printUrl, {
@@ -345,6 +365,53 @@ export class FormComponent implements OnInit, OnDestroy {
       this.plantLabelForm.patchValue(patchObj);
       this.previewImageError = false;
       this.isPreviewLoading = true;
+    }
+  }
+
+  applyRecentPrint(item: PrintHistoryItem): void {
+    const patchObj: Record<string, any> = {
+      copies: item.copies || 1
+    };
+
+    if (this.plantLabelForm.get('plantName')) {
+      patchObj['plantName'] = item.variables['PLANT_NAME'] || item.plantName;
+    }
+    if (this.plantLabelForm.get('url')) {
+      patchObj['url'] = item.variables['URL'] || item.url;
+    }
+
+    if (item.variables) {
+      Object.entries(item.variables).forEach(([k, v]) => {
+        if (this.plantLabelForm.get(k)) {
+          patchObj[k] = v;
+        }
+      });
+    }
+
+    this.plantLabelForm.patchValue(patchObj);
+    this.previewImageError = false;
+    this.isPreviewLoading = true;
+  }
+
+  clearHistory(): void {
+    this.historyService.clearHistory();
+  }
+
+  formatTime(isoString: string): string {
+    if (!isoString) return '';
+    try {
+      const date = new Date(isoString);
+      const now = new Date();
+      const diffMs = now.getTime() - date.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+
+      if (diffMins < 1) return 'Just now';
+      if (diffMins < 60) return `${diffMins}m ago`;
+      const diffHours = Math.floor(diffMins / 60);
+      if (diffHours < 24) return `${diffHours}h ago`;
+      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    } catch {
+      return '';
     }
   }
 
