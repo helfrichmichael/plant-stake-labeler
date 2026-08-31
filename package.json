@@ -1,6 +1,6 @@
 {
-  "name": "label-live-app",
-  "version": "0.0.0",
+  "name": "plant-stake-labeler",
+  "version": "1.0.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

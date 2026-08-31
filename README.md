@@ -18,16 +18,16 @@ graph TD
 
 ---
 
-## 🍎 Quick Start for macOS (1-Click Launch)
+## 🖥️ Quick Start for Desktop (macOS & Windows)
 
-If you are on macOS:
-
+### 🍎 macOS (1-Click Launch)
 1. Double-click **`start.command`** in the project root.
-2. The launcher automatically:
-   - Verifies Label LIVE is active on port `11180` (or opens it).
-   - Starts a lightweight local web server.
-   - Opens your browser to `http://localhost:4200`.
-3. Click the ⚙️ **Settings** gear icon in the top header to configure your Google Sheet and printer.
+2. The launcher checks if the app is built, starts the local server, and opens **`http://localhost:4200`** in your default browser.
+3. Click the ⚙️ **Settings** gear icon in the header to configure your Google Sheet and printer.
+
+### 🪟 Windows (1-Click Launch)
+1. Double-click **`start.bat`** in the project root.
+2. The launcher starts the local server and opens **`http://localhost:4200`** in your default browser.
 
 ---
 
