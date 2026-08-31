@@ -56,9 +56,13 @@ export class FormComponent implements OnInit, OnDestroy {
   detectedHeaders: string[] = [];
   apiUrlToUse = '';
   previewImageError = false;
-  previewTimeoutId: any;
+  isPreviewLoading = false;
   private settingsSub?: Subscription;
   private formSub?: Subscription;
+
+  constructor() {
+    this.updateApiUrl();
+  }
 
   get hostname(): string {
     return window.location.hostname;
@@ -67,7 +71,6 @@ export class FormComponent implements OnInit, OnDestroy {
   get searchColumn(): string {
     const configured = this.currentSettings.searchColumn || 'Plant Name';
     if (this.detectedHeaders.length > 0 && !this.detectedHeaders.includes(configured)) {
-      // Find case-insensitive match or fallback to first header
       const match = this.detectedHeaders.find(h => h.toLowerCase() === configured.toLowerCase());
       return match || this.detectedHeaders[0];
     }
@@ -79,6 +82,7 @@ export class FormComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.updateApiUrl();
     this.settingsSub = this.settingsService.settings$.subscribe(settings => {
       this.currentSettings = settings;
       this.updateApiUrl();
@@ -90,9 +94,6 @@ export class FormComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.settingsSub?.unsubscribe();
     this.formSub?.unsubscribe();
-    if (this.previewTimeoutId) {
-      clearTimeout(this.previewTimeoutId);
-    }
   }
 
   updateApiUrl(): void {
@@ -137,10 +138,12 @@ export class FormComponent implements OnInit, OnDestroy {
     this.plantLabelForm = new FormGroup(group);
 
     this.formSub = this.plantLabelForm.valueChanges.subscribe(() => {
-      this.resetPreviewTimeout();
+      this.previewImageError = false;
+      this.isPreviewLoading = true;
     });
 
-    this.resetPreviewTimeout();
+    this.previewImageError = false;
+    this.isPreviewLoading = true;
   }
 
   loadPlantList(): void {
@@ -166,30 +169,14 @@ export class FormComponent implements OnInit, OnDestroy {
     );
   }
 
-  resetPreviewTimeout(): void {
-    this.previewImageError = false;
-    if (this.previewTimeoutId) {
-      clearTimeout(this.previewTimeoutId);
-    }
-    this.previewTimeoutId = setTimeout(() => {
-      this.previewImageError = true;
-    }, 5000);
-  }
-
   onPreviewLoad(): void {
     this.previewImageError = false;
-    if (this.previewTimeoutId) {
-      clearTimeout(this.previewTimeoutId);
-      this.previewTimeoutId = null;
-    }
+    this.isPreviewLoading = false;
   }
 
   onPreviewError(): void {
     this.previewImageError = true;
-    if (this.previewTimeoutId) {
-      clearTimeout(this.previewTimeoutId);
-      this.previewTimeoutId = null;
-    }
+    this.isPreviewLoading = false;
   }
 
   private filterValues(value: string): Record<string, string>[] {
@@ -290,15 +277,18 @@ export class FormComponent implements OnInit, OnDestroy {
       variables[mapping.variableName] = val !== null && val !== undefined ? String(val) : (mapping.fallback || '');
     });
 
-    if (this.variableMappings.length === 0) {
-      variables['PLANT_NAME'] = `${this.plantLabelForm.get('plantName')?.value || ''}`;
-      variables['URL'] = `${this.plantLabelForm.get('url')?.value || ''}`;
+    if (Object.keys(variables).length === 0 || this.variableMappings.length === 0) {
+      variables['PLANT_NAME'] = `${this.plantLabelForm.get('plantName')?.value || 'Monstera Deliciosa'}`;
+      variables['URL'] = `${this.plantLabelForm.get('url')?.value || 'https://mikescarnivores.com'}`;
     }
 
     return variables;
   }
 
   get previewImage(): string {
+    if (!this.apiUrlToUse) {
+      this.updateApiUrl();
+    }
     const variables = this.getVariablesPayload();
     const design = this.currentSettings.designName || 'MC_Label';
     return `${this.apiUrlToUse}print?design=${encodeURIComponent(design)}&variables=${encodeURIComponent(JSON.stringify(variables))}`;
@@ -353,7 +343,8 @@ export class FormComponent implements OnInit, OnDestroy {
       }
 
       this.plantLabelForm.patchValue(patchObj);
-      this.resetPreviewTimeout();
+      this.previewImageError = false;
+      this.isPreviewLoading = true;
     }
   }
 
@@ -403,7 +394,6 @@ export class ConfirmationDialog implements OnInit {
   url?: string;
   variables: Record<string, string> = {};
   imageError = false;
-  dialogTimeoutId: any;
   readonly dialogRef = inject(MatDialogRef<ConfirmationDialog>);
 
   constructor(@Inject(MAT_DIALOG_DATA) public data: { previewImage: string, copies: number, plantName: string, url: string, variables?: Record<string, string> }) {
@@ -419,30 +409,15 @@ export class ConfirmationDialog implements OnInit {
   }
 
   ngOnInit(): void {
-    this.resetDialogTimeout();
-  }
-
-  resetDialogTimeout(): void {
     this.imageError = false;
-    this.dialogTimeoutId = setTimeout(() => {
-      this.imageError = true;
-    }, 5000);
   }
 
   onImageLoad(): void {
     this.imageError = false;
-    if (this.dialogTimeoutId) {
-      clearTimeout(this.dialogTimeoutId);
-      this.dialogTimeoutId = null;
-    }
   }
 
   onImageError(): void {
     this.imageError = true;
-    if (this.dialogTimeoutId) {
-      clearTimeout(this.dialogTimeoutId);
-      this.dialogTimeoutId = null;
-    }
   }
 
   print(): void {

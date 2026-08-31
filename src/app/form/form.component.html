@@ -9,7 +9,7 @@
         <div class="preview-error-state" [style.display]="previewImageError ? 'flex' : 'none'">
           <mat-icon>cloud_off</mat-icon>
           <p class="error-title">Preview Unavailable</p>
-          <p class="error-msg">Could not load preview. Please verify if the Label LIVE local server is running on port {{ currentSettings.hostPort }}.</p>
+          <p class="error-msg">Could not load preview from {{ apiUrlToUse }}. Please verify if the Label LIVE server is running.</p>
         </div>
         <img [src]="previewImage" 
              [style.display]="previewImageError ? 'none' : 'block'"
