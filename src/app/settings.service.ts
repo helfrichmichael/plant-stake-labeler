@@ -28,7 +28,7 @@ export interface AppSettings {
 const SETTINGS_STORAGE_KEY = 'plant_stake_labeler_settings';
 
 export const DEFAULT_VARIABLE_MAPPINGS: VariableMapping[] = [
-  { variableName: 'PLANT_NAME', sheetColumn: 'Plant Name', fallback: "Monstera Deliciosa 'Thai Constellation'" },
+  { variableName: 'PLANT_NAME', sheetColumn: 'Name', fallback: "Monstera Deliciosa 'Thai Constellation'" },
   { variableName: 'URL', sheetColumn: 'URL', fallback: 'https://mikescarnivores.com' }
 ];
 
@@ -38,7 +38,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   spreadsheetId: environment.spreadsheetId || '',
   apiKey: environment.apiKey || '',
   sheetName: 'Sheet1',
-  searchColumn: 'Plant Name',
+  searchColumn: 'Name',
   hostIp: HOST_IP,
   hostPort: HOST_PORT,
   remoteApiUrl: REMOTE_API_URL,
