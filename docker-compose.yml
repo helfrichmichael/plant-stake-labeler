@@ -1,6 +1,6 @@
 services:
   plant-stake-labeler:
-    image: ghcr.io/helfrichmichael/plant-stake-labeler:latest
+    image: helfrichmichael/plant-stake-labeler:latest
     build:
       context: .
       dockerfile: Dockerfile

@@ -36,12 +36,12 @@ To run Plant Stake Labeler on a home server, Raspberry Pi, Unraid, or local Dock
 # Using Docker Compose (recommended - automatically mounts ./data volume)
 docker compose up -d
 
-# Or run pre-built container from GitHub Container Registry
+# Or run pre-built container from Docker Hub
 docker run -d \
   --name plant-stake-labeler \
   -p 4200:4200 \
   -v $(pwd)/data:/app/data \
-  ghcr.io/helfrichmichael/plant-stake-labeler:latest
+  helfrichmichael/plant-stake-labeler:latest
 ```
 
 ---
