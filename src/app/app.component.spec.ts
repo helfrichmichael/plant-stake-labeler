@@ -1,18 +1,24 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
-import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { AppComponent } from './app.component';
+import { SettingsService } from './settings.service';
+import { PrintHistoryService } from './print-history.service';
 import { GoogleSheetsService } from './google-sheets.service';
 import { of } from 'rxjs';
 import { By } from '@angular/platform-browser';
 
 describe('AppComponent', () => {
   let mockGoogleSheetsService: any;
+  let settingsService: SettingsService;
+  let historyService: PrintHistoryService;
+  let httpTestingController: HttpTestingController;
 
   beforeEach(async () => {
     mockGoogleSheetsService = {
-      getValues: jasmine.createSpy('getValues').and.returnValue(of([]))
+      getValues: jasmine.createSpy('getValues').and.returnValue(of([])),
+      fetchSheetData: jasmine.createSpy('fetchSheetData').and.returnValue(of({ headers: [], rows: [] }))
     };
 
     await TestBed.configureTestingModule({
@@ -21,15 +27,40 @@ describe('AppComponent', () => {
         provideHttpClient(),
         provideHttpClientTesting(),
         provideNoopAnimations(),
+        SettingsService,
+        PrintHistoryService,
         { provide: GoogleSheetsService, useValue: mockGoogleSheetsService }
       ]
     }).compileComponents();
+
+    httpTestingController = TestBed.inject(HttpTestingController);
+    settingsService = TestBed.inject(SettingsService);
+    historyService = TestBed.inject(PrintHistoryService);
+  });
+
+  afterEach(() => {
+    const configReqs = httpTestingController.match('/api/config');
+    configReqs.forEach(r => r.flush({}));
+    const historyReqs = httpTestingController.match('/api/history');
+    historyReqs.forEach(r => r.flush([]));
+    httpTestingController.verify();
   });
 
   it('should create the app', () => {
     const fixture = TestBed.createComponent(AppComponent);
     const app = fixture.componentInstance;
     expect(app).toBeTruthy();
+  });
+
+  it('should sync settings and history on initialization', () => {
+    spyOn(settingsService, 'syncFromServer');
+    spyOn(historyService, 'syncFromServer');
+
+    const fixture = TestBed.createComponent(AppComponent);
+    fixture.detectChanges();
+
+    expect(settingsService.syncFromServer).toHaveBeenCalled();
+    expect(historyService.syncFromServer).toHaveBeenCalled();
   });
 
   it('should render header and form components in layout', () => {

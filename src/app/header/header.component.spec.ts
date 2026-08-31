@@ -1,21 +1,36 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HeaderComponent } from './header.component';
 import { By } from '@angular/platform-browser';
-
 import { provideHttpClient } from '@angular/common/http';
 import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { provideNoopAnimations } from '@angular/platform-browser/animations';
+import { MatDialog } from '@angular/material/dialog';
+import { SettingsDialogComponent } from '../settings-dialog/settings-dialog.component';
 
 describe('HeaderComponent', () => {
   let component: HeaderComponent;
   let fixture: ComponentFixture<HeaderComponent>;
+  let mockMatDialog: jasmine.SpyObj<MatDialog>;
 
   beforeEach(async () => {
+    mockMatDialog = jasmine.createSpyObj('MatDialog', ['open']);
+    mockMatDialog.open.and.returnValue({} as any);
+
     await TestBed.configureTestingModule({
       imports: [HeaderComponent],
       providers: [
         provideHttpClient(),
-        provideHttpClientTesting()
+        provideHttpClientTesting(),
+        provideNoopAnimations(),
+        { provide: MatDialog, useValue: mockMatDialog }
       ]
+    })
+    .overrideComponent(HeaderComponent, {
+      set: {
+        providers: [
+          { provide: MatDialog, useValue: mockMatDialog }
+        ]
+      }
     })
     .compileComponents();
     
@@ -40,5 +55,15 @@ describe('HeaderComponent', () => {
     expect(imgEl).toBeTruthy();
     expect(imgEl.nativeElement.getAttribute('src')).toBe('./assets/logo_banner.svg');
     expect(imgEl.nativeElement.getAttribute('alt')).toBe('Plant Stake Labeler');
+  });
+
+  it('should open settings dialog when openSettings() is called', () => {
+    component.openSettings();
+
+    expect(mockMatDialog.open).toHaveBeenCalledWith(SettingsDialogComponent, {
+      width: '680px',
+      maxWidth: '95vw',
+      disableClose: false
+    });
   });
 });
