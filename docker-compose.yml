@@ -1,0 +1,14 @@
+services:
+  plant-stake-labeler:
+    image: ghcr.io/helfrichmichael/plant-stake-labeler:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: plant-stake-labeler
+    restart: unless-stopped
+    ports:
+      - "4200:4200"
+    volumes:
+      # Mount local configuration and print history for persistence
+      - ./config.json:/app/config.json
+      - ./print_history.json:/app/print_history.json

@@ -29,6 +29,22 @@ graph TD
 1. Double-click **`start.bat`** in the project root.
 2. The launcher starts the local server and opens **`http://localhost:4200`** in your default browser.
 
+### 🐳 Docker & Docker Compose
+To run Plant Stake Labeler on a home server, Raspberry Pi, Unraid, or local Docker:
+
+```bash
+# Using Docker Compose (builds and runs with persistent data)
+docker compose up -d
+
+# Or run pre-built container from GitHub Container Registry
+docker run -d \
+  --name plant-stake-labeler \
+  -p 4200:4200 \
+  -v $(pwd)/config.json:/app/config.json \
+  -v $(pwd)/print_history.json:/app/print_history.json \
+  ghcr.io/helfrichmichael/plant-stake-labeler:latest
+```
+
 ---
 
 ## 📋 Prerequisites
