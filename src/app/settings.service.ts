@@ -1,7 +1,6 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, Observable, catchError, of } from 'rxjs';
-import { environment } from './environment';
 import { HOST_IP, HOST_PORT, REMOTE_API_URL, DESIGN_NAME, PRINTER_ID } from './app.config';
 
 export interface VariableMapping {
@@ -33,10 +32,10 @@ export const DEFAULT_VARIABLE_MAPPINGS: VariableMapping[] = [
 ];
 
 export const DEFAULT_SETTINGS: AppSettings = {
-  dataSourceType: environment.apiKey ? 'googleApi' : 'csvUrl',
-  spreadsheetUrl: environment.spreadsheetId ? `https://docs.google.com/spreadsheets/d/${environment.spreadsheetId}/edit` : '',
-  spreadsheetId: environment.spreadsheetId || '',
-  apiKey: environment.apiKey || '',
+  dataSourceType: 'csvUrl',
+  spreadsheetUrl: '',
+  spreadsheetId: '',
+  apiKey: '',
   sheetName: 'Sheet1',
   searchColumn: 'Name',
   hostIp: HOST_IP,
