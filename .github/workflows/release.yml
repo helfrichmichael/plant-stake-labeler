@@ -1,0 +1,60 @@
+name: Build and Package Desktop Releases
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Compile Angular production bundle
+        run: npm run build
+
+      - name: Package macOS distribution
+        run: |
+          mkdir -p package-macos/plant-stake-labeler
+          cp start.command server.py config.example.json MC_Label.lsc README.md package-macos/plant-stake-labeler/
+          cp -r dist package-macos/plant-stake-labeler/
+          chmod +x package-macos/plant-stake-labeler/start.command package-macos/plant-stake-labeler/server.py
+          cd package-macos
+          zip -r ../plant-stake-labeler-macos.zip plant-stake-labeler
+          cd ..
+
+      - name: Package Windows distribution
+        run: |
+          mkdir -p package-windows/plant-stake-labeler
+          cp start.bat server.py config.example.json MC_Label.lsc README.md package-windows/plant-stake-labeler/
+          cp -r dist package-windows/plant-stake-labeler/
+          cd package-windows
+          zip -r ../plant-stake-labeler-windows.zip plant-stake-labeler
+          cd ..
+
+      - name: Create GitHub Release and Upload Binaries
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch'
+        with:
+          files: |
+            plant-stake-labeler-macos.zip
+            plant-stake-labeler-windows.zip
+          generate_release_notes: true
+          draft: false
+          prerelease: false
