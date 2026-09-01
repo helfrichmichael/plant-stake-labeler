@@ -41,7 +41,7 @@ docker run -d \
   --name plant-stake-labeler \
   -p 4200:4200 \
   -v $(pwd)/data:/app/data \
-  helfrichmichael/plant-stake-labeler:latest
+  mikeah/plant-stake-labeler:latest
 ```
 
 ---
