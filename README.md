@@ -25,6 +25,14 @@ graph TD
 2. The launcher checks if the app is built, starts the local server, and opens **`http://localhost:4200`** in your default browser.
 3. Click the ⚙️ **Settings** gear icon in the header to configure your Google Sheet and printer.
 
+> [!NOTE]
+> **First-Time macOS Gatekeeper Setup:**
+> Because `start.command` is a downloaded script, macOS Gatekeeper may block it on first launch.
+> To allow it:
+> 1. Open **System Settings > Privacy & Security**.
+> 2. Scroll all the way down to the **Security** section.
+> 3. Click **"Open Anyway"** next to `start.command` (or right-click `start.command` and select **Open**).
+
 ### 🪟 Windows (1-Click Launch)
 1. Double-click **`start.bat`** in the project root.
 2. The launcher starts the local server and opens **`http://localhost:4200`** in your default browser.
