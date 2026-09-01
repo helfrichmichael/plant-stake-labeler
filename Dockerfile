@@ -1,7 +1,7 @@
 # ==========================================
-# Stage 1: Build Angular Web Application
+# Stage 1: Build Angular Web Application (Build Platform)
 # ==========================================
-FROM node:20-alpine AS builder
+FROM --platform=$BUILDPLATFORM node:20-alpine AS builder
 
 WORKDIR /app
 
